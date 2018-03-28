@@ -1,0 +1,15 @@
+<link rel="stylesheet" type="text/css" href="../static/main.css">
+<!-- scripts -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+		<script>
+			var graphData = {{ data.articles | safe }};
+		</script>
+</head>
+<body>
+	<script src="http://d3js.org/d3.v4.min.js"></script>
+	<script src="{{url_for('static', filename='main.js')}}"></script>
+</body>
+</html>
