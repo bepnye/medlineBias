@@ -2,7 +2,7 @@ from collections import namedtuple
 
 #TARGET_TOP = '/scratch-shared/users/bennye/medline/'
 MESH_DIVIDER = '|'
-TOP = '/Users/ben/Desktop/medline_bias/'
+TOP = '/Users/ben/Desktop/medlineBias/'
 #SOURCE_TOP = '/home1/b/bennye/xml_source/'
 SOURCE_TOP = '%s/data/xml_files/' %TOP
 XML_TOP    = '%s/data/all_xml/' %TOP

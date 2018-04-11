@@ -163,7 +163,7 @@ def predict_gender(pmids, articles, article_tokens, journal_vocab, country_vocab
 
 
 def year_pkl_name(y):
-  return '/Users/ben/Desktop/medline_bias/data/working_dir/%d_articles.pkl' %y
+  return '%s/data/working_dir/%d_articles.pkl' %(TOP, y)
 
 def read_years():
   for year in YEARS:
@@ -175,31 +175,72 @@ def read_years():
 def mesh_to_sex(mesh):
   m = 'Male' in mesh
   f = 'Female' in mesh
-  return 'B' if (m and f) else ('M' if m else ('F' if f else 'N'))
+  if m and not f:
+    return 'M'
+  if f and not m:
+    return 'F'
+  else:
+    return 'X'
 
 def load_articles():
   return sum([load_pkl(year_pkl_name(y), True) for y in YEARS], [])
 
 def load_mesh_tree():
-  return load_pkl('/Users/ben/Desktop/medline_bias/data/mesh_tree.pkl')
+  return load_pkl('%s/data/mesh_tree.pkl' %TOP)
 
-def write_csv(articles):
-  sep1 = '\t'
-  sep2 = '|'
-  header = ['PMID', 'date', 'journal', 'Country', 'mesh']
+SEP1 = '\t'
+SEP2 = '|'
+
+def write_article_csv(articles):
+  header = ['pmid', 'date', 'journal', 'country', 'label', 'mesh']
   formatters = {
-                 'PMID' : lambda s: s,
+                 'pmid' : lambda s: 'P'+s,
                  'date' : lambda s: s.year,
                  'journal': lambda s: s.title if s else '<MISSING>',
-                 'Country': lambda s: s,
-                 'mesh': lambda s: sep2.join(['%s' %m.text for m in s]),
+                 'country': lambda s: s,
+                 'label': lambda s: s,
+                 'mesh': lambda s: SEP2.join(['%s' %m.text for m in s]),
                }
   with open('articles.csv', 'w') as fp:
-    fp.write(sep1.join(header))
+    fp.write(SEP1.join(header))
     for a in articles:
       a_dict = a._asdict()
+      a_dict['country'] = a.Country
+      a_dict['pmid'] = a.PMID
+      a_dict['label'] = mesh_to_sex([m.text for m in a.mesh])
       fields = [formatters[f](a_dict[f]).encode('ascii', 'replace') for f in header]
-      fp.write('\n' + sep1.join(fields))
+      fp.write('\n' + SEP1.join(fields))
+
+
+def write_mesh_csv(meshTree):
+  header = ['name', 'uid', 'treepos', 'children']
+  formatters = {
+    'name': lambda m: m.name,
+    'uid': lambda m: m.UI,
+    'treepos': lambda m: SEP2.join(m.tree_numbers),
+    'children': lambda m: SEP2.join(list(set([_m.UI for _m in meshTree.get_children(m)]))),
+    }
+  with open('mesh.csv', 'w') as fp:
+    fp.write(SEP1.join(header))
+    for m in meshTree.mesh:
+      fields = [formatters[f](m).encode('ascii', 'replace') for f in header]
+      fp.write('\n' + SEP1.join(fields))
+
+def get_mesh_to_pmids(articles, mesh_tree):
+  mesh_to_pmids = { m.UI: [] for m in mesh_tree.mesh }
+  for a in articles:
+    for m in a.mesh:
+      if m.UI in mesh_to_pmids:
+        mesh_to_pmids[m.UI].append(a.PMID)
+  return mesh_to_pmids
+
+def write_mesh_to_pmids(articles, mesh_tree):
+  mesh_to_pmids = get_mesh_to_pmids(articles, mesh_tree)
+  with open('mesh_to_pmids.csv', 'w') as fp:
+    fp.write(SEP1.join(['uid', 'pmids']))
+    for uid, pmids in mesh_to_pmids.items():
+      fp.write('\n' + SEP1.join([uid, SEP2.join(['P'+p for p in pmids])]))
+
 
 def score_counts((m_count, f_count)):
   return log_or_0(m_count, f_count)
@@ -266,22 +307,18 @@ class MeshTree:
     return [m for m in self.mesh if any([pos.count('.') == 0 and pos[0] == prefix for pos in m.tree_numbers])]
 
 def compute_data(articles, mesh_tree):
+
   print 'building mesh -> pmids'
   mesh_to_pmids = { m.UI: [] for m in mesh_tree.mesh }
-  pmid_to_year = {}
   for a in articles:
-    pmid_to_year[a.PMID] = a.date.year
     for m in a.mesh:
       if m.UI in mesh_to_pmids:
         mesh_to_pmids[m.UI].append(a.PMID)
 
-  print 'building pmid -> count'
-  pmid_to_count = {}
+  print 'building pmid -> label'
+  pmid_to_label = {}
   for a in articles:
-    f = any([m.text == 'Female' for m in a.mesh])
-    m = any([m.text == 'Male' for m in a.mesh])
-    x = 0.5 if f and m else 0.0
-    pmid_to_count[a.PMID] = (m-x, f-x)
+    pmid_to_label[a.PMID] = mesh_to_sex([m.text for m in a.mesh])
 
   print 'building mesh -> descendants'
   mesh_to_descendants = { m.UI: mesh_tree.get_descendants(m) for m in mesh_tree.mesh }
@@ -289,12 +326,7 @@ def compute_data(articles, mesh_tree):
   print 'building mesh -> score'
   mesh_to_score = {}
   for ui, pmids in mesh_to_pmids.items():
-    counts = { y: [0.0, 0.0] for y in YEARS }
-    for pmid in pmids:
-      y = int(pmid_to_year[pmid])
-      counts[y][0] += pmid_to_count[pmid][0]
-      counts[y][1] += pmid_to_count[pmid][1]
-    mesh_to_score[ui] = counts
+    mesh_to_score[ui] = Counter([pmid_to_label[pmid] for pmid in pmids])
 
   print 'building node -> pmids'
   node_to_pmids = {}
@@ -383,6 +415,40 @@ def plot_data(input_vars):
   
   if 'target_mesh_name' in input_vars:
     del input_vars['target_mesh_name']
+
+def get_disease_pmids(articles):
+  tag_genre_mapping = {
+# Autistic
+    'Autistic Disorder':'Autistic',
+    'Child Development Disorders Pervasive':'Autistic',
+    'Psychiatric Status Rating Scales':'Autistic',
+    'Neuropsychological Tests':'Autistic',
+    'Behavior Therapy':'Autistic',
+# Cardiovascular
+    'Blood Pressure':'Cardiovascular',
+    'Hypertension':'Cardiovascular',
+    'Heart Rate':'Cardiovascular',
+    'Body Mass Index':'Cardiovascular',
+    'Myocardial Infarction':'Cardiovascular',
+    'Heart Failure':'Cardiovascular',
+    'Antihypertensive Agents':'Cardiovascular',
+# Cancer
+    'Antineoplastic Combined Chemotherapy Protocols':'Cancer',
+    'Breast Neoplasms':'Cancer',
+    'Antineoplastic Agents':'Cancer',
+    'Neoplasm Staging':'Cancer',
+    'Neoplasms':'Cancer',
+    'Lung Neoplasms':'Cancer',
+    'Neoplasm Recurrence Local':'Cancer'
+  }
+  disease_pmids = { 'All': set() }
+  for d in tag_genre_mapping.values():
+    disease_pmids[d] = set()
+  for a in articles:
+    diseases = set([tag_genre_mapping.get(m.text, 'All') for m in a.mesh])
+    for disease in diseases:
+      disease_pmids[disease].add(a.PMID)
+  return disease_pmids
 
 if __name__ == '__main__':
   articles = load_articles()

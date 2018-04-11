@@ -1,25 +1,43 @@
-#chart {
-  overflow-y: scroll;
+div {
+  width: 900px;
+  height: 600px;
+  background-color: #eee;
+  overflow: scroll;
 }
 
-#chart {
-  background: #eee;
-  padding: 3px;
+.plot {
+  position: absolute;
 }
 
-#chart div {
-  width: 0;
-  transition: all 1s ease-out;
-  -moz-transition: all 1s ease-out;
-  -webkit-transition: all 1s ease-out;
+.country {
+    fill: pink;
+    stroke: #fff;
+    stroke-linejoin: round;
+  }
+  .legendThreshold {
+      font-size: 12px;
+      font-family: sans-serif;
+  }
+  .caption {
+      fill: #000;
+      text-anchor: start;
+      font-weight: bold;
+  }
+  .fill {
+  fill: #fff;
 }
 
-#chart div {
-  height: 30px;
-  font: 15px;
-  background-color: #006dcc;
-  text-align: right;
-  padding: 3px;
-  color: white;
-  box-shadow: 2px 2px 2px gray;
+.node circle {
+    fill: #fff;
+    stroke-width: 3px;
+}
+
+.node text {
+    font: 12px sans-serif;
+}
+
+.link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2px;
 }

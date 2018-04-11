@@ -1,54 +1,217 @@
-var margin = {
-  top: 40,
-  right: 40,
-  bottom: 60,
-  left: 60
+var meshLookup = new Map();
+var articleLookup = new Map();
+var meshNameToUid = new Map();
+
+_meshData.forEach(function(m) {
+  meshLookup.set(m.uid, m);
+  meshNameToUid.set(m.name, m.uid);
+});
+_articleData.forEach(function(a) {
+	articleLookup.set(a.pmid, a);
+});
+_meshToArticles.forEach(function(d) {
+  meshLookup.get(d.uid).pmids = d.pmids;
+  meshLookup.get(d.uid).bias = 0.0;
+});
+
+console.log(meshLookup);
+console.log(articleLookup);
+
+var allMesh = Array.from(meshLookup.keys());
+var allArticles = Array.from(articleLookup.keys());
+
+var rootMesh = 'D012164';
+var selectedMesh = allMesh.slice();
+var selectedArticles = allArticles.slice();
+
+var topPlot;
+var bottomPlot;
+// Unique ids for checking which plot is active
+var TREE_PLOT = 0;
+var LIST_PLOT = 1;
+var TIME_PLOT = 2;
+var MAP_PLOT = 4;
+
+var treeData;
+var meshData;
+var yearData;
+var countryData;
+
+function getSubtreeMesh(root) {
+  var queue = [root];
+  var subMesh = new Set();
+  while (queue.length > 0) {
+    var m = queue.shift();
+    subMesh.add(m);
+    meshLookup.get(m).children.forEach(function(c) {
+      if (meshLookup.has(c)) {
+        queue.push(meshLookup.get(c).uid);
+      }
+    });
+  }
+  return Array.from(subMesh);
 }
 
-console.log(graphData);
+function getBiasFromLabels(labels) {
+  if (labels.length == 0) { return 0.0; }
+	var nF = 0;
+	var nM = 0;
+	labels.forEach(function(l) {
+		if (l == 'F' || l == 'X') { nF++; }
+		if (l == 'M' || l == 'X') { nM++; }
+	});
+  return nM/labels.length - nF/labels.length;
+}
 
-var width = 500 - margin.left - margin.right;
-var height = 500 - margin.top - margin.bottom;
+function getBiasFromPmids(pmids) {
+  var labels = [];
+  pmids.forEach(function(pmid) {
+    labels.push(articleLookup.get(pmid).label);
+  });
+  return getBiasFromLabels(labels);
+}
 
-var svg = d3.select("body").append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+function updateMeshBias() {
+  console.log('Updating mesh bias...');
+  var curArticles = new Set(selectedArticles);
+  meshLookup.forEach(function(m, ui, map) {
+    var pmids = m.pmids.filter(function(pmid) { return curArticles.has(pmid); });
+    console.log(m, pmids);
+    m.bias = getBiasFromPmids(pmids);
+  });
+  console.log('done!');
+};
 
-var xScale = d3.scaleLinear()
-  .range([0, width])
-  .domain([0, 9000]);
+function computeYearData() {
+  console.log('Computing year data...');
+  var yearData = new Map();
+  selectedArticles.forEach(function(a) {
+    var article = articleLookup.get(a);
+    var y = article.date;
+    if (!yearData.has(y)) {
+      yearData.set(y, { 'labels': [], 'year': y });
+    }
+    yearData.get(y).labels.push(article.label);
+  });
+  var years = Array.from(yearData.keys());
+  years.forEach(function(y) {
+    yearData.get(y).bias = getBiasFromLabels(yearData.get(y).labels);
+  });
+  var yi = d3.min(years);
+  var yf = d3.max(years);
+  for (i = yi; i < yf; i++) {
+    if (!yearData.has(i)) {
+      yearData.set(i, { 'labels': [], 'year': i, 'bias': 0.0 });
+    }
+  }
+  console.log('done!');
+  return Array.from(yearData.values());
+}
 
+function computeCountryData() {
+  console.log('Computing country data...');
+	var countryData = new Map();
+  selectedArticles.forEach(function(a) {
+    var article = articleLookup.get(a);
+    var c = countryDict[article.country];
+    if (!countryData.has(c)) {
+      countryData.set(c, { 'labels': [], 'names': new Set() });
+    }
+    countryData.get(c).labels.push(article.label);
+    countryData.get(c).names.add(article.country);
+  });
+  Array.from(countryData.keys()).forEach(function(c) {
+    countryData.get(c).bias = getBiasFromLabels(countryData.get(c).labels);
+  });
+  console.log('done!');
+  return countryData;
+}
 
-var yScale = d3.scaleLinear()
-  .range([height, 0])
-  .domain([0, 9000]);
+function computeMeshData() {
+  console.log('Computing mesh data...');
+  var meshData = [];
+  selectedMesh.forEach(function(m) {
+    meshData.push(meshLookup.get(m));
+  });
+  console.log('done!');
+  return meshData;
+}
 
-var xAxis = svg.append('g')
-  .attr('transform', 'translate(0,' + height + ')')
-  .call(d3.axisBottom().scale(xScale));
+function computeAllData() {
+  updateMeshBias();
+  treeData = computeTreeData();
+  console.log(treeData);
+  meshData = computeMeshData();
+  console.log(meshData);
+  yearData = computeYearData();
+  console.log(yearData);
+  countryData = computeCountryData();
+  console.log(countryData);
+}
 
-var yAxis = svg.append('g')
-  .call(d3.axisLeft().scale(yScale));
+function updateSelectedMesh(newSelectedMesh) {
+  selectedMesh = newSelectedMesh;
+  // Update the articles to include only the ones with relevant mesh terms
+  newSelectedArticles = new Set();
+  selectedMesh.forEach(function(m) {
+    meshLookup.get(m).pmids.forEach(function(p) {
+      if (p != "") {
+        newSelectedArticles.add(p);
+      }
+    });
+  });
+  console.log(selectedMesh);
+  console.log(newSelectedArticles);
+  updateSelectedArticles(Array.from(newSelectedArticles));
+}
 
-svg.append("text")
-  .attr("transform",
-    "translate(" + (width / 2) + " ," +
-    (height + margin.top) + ")")
-  .style("text-anchor", "middle")
-  .text("Building Value");
+function updateSelectedArticles(newSelectedArticles) {
+  selectedArticles = newSelectedArticles;
+  computeAllData();
+  refreshPlots();
+}
 
-svg.append("text")
-  .attr("transform", "rotate(-90)")
-  .attr("y", 0 - margin.left)
-  .attr("x", 0 - (height / 2))
-  .attr("dy", "1em")
-  .style("text-anchor", "middle")
-  .text("Building Sq Ft");
+function setRootMesh() {
+  console.log('yay');
+  var meshName = document.getElementById("meshNode").value;
+  if (!meshNameToUid.has(meshName)) {
+    alert('No matching mesh found ('+meshName+')');
+  } else {
+    rootMesh = meshNameToUid.get(meshName);
+    updateSelectedMesh(getSubtreeMesh(rootMesh));
+  }
+}
 
-svg.append("text")
-  .attr("transform",
-    "translate(" + (width / 2) + " ,-10)")
-  .style("text-anchor", "middle")
-  .text("Building Value vs Size");
+function refreshPlots() {
+  if (topPlot == TREE_PLOT) {
+    drawTree();
+  } else {
+    drawList();
+  }
+  if (bottomPlot == TIME_PLOT) {
+    drawTime();
+  } else {
+    drawMap();
+  }
+}
+
+function drawTree() {
+  topPlot = TREE_PLOT;
+  drawTreeData();
+}
+function drawList() {
+  topPlot = LIST_PLOT;
+  drawMeshData();
+}
+function drawTime() {
+  bottomPlot = TIME_PLOT;
+  drawYearData();
+}
+function drawMap() {
+  bottomPlot = MAP_PLOT;
+  drawCountryData();
+}
+
+computeAllData();
+
+//console.log(articleData);
