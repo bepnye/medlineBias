@@ -135,7 +135,7 @@ function plot(){
       .attr("fill", function(d) { return colorMap(d.bias);     })
 }
 function dragged() {
-  if (topPlot != 'list') { return; }
+  if (topPlot != LIST_PLOT) { return; }
   var dy = d3.event.dy;
   if((yTop == diseases.length && dy > 0) ||
      (yBottom == 0 && dy < 0)){
@@ -158,6 +158,6 @@ function dragged() {
 }
 
 function drag_ended() {
-  if (topPlot != 'list') { return; }
+  if (topPlot != LIST_PLOT) { return; }
   movement = 0;
 }
