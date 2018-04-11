@@ -212,6 +212,10 @@ function drawMap() {
   drawCountryData();
 }
 
-computeAllData();
+function init() {
+  computeAllData();
+  drawTree();
+  drawTime();
+}
 
 //console.log(articleData);
