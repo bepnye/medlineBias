@@ -4,8 +4,13 @@ var time_range;
 var xScale;
 var yScale;
 
+var yearMargin = {top : 20,
+              bottom: 40,
+              left : 50,
+              right: 20};
+
 var timeBrush = d3.brushX()
-  .extent([[margin.left, margin.top], [width-margin.right, height-margin.bottom]])
+  .extent([[yearMargin.left, yearMargin.top], [width-yearMargin.right, height-yearMargin.bottom]])
   .on("brush", display_dates)
   .on("end", brushed_time);
 
@@ -29,8 +34,8 @@ function drawYearData() {
   });
   data.sort(function(a,b) {return a.year-b.year; });
 
-	xScale = d3.scaleTime().range([margin.left, width-margin.right]);
-	yScale = d3.scaleLinear().range([height-margin.bottom, margin.top]);
+	xScale = d3.scaleTime().range([yearMargin.left, width-yearMargin.right]);
+	yScale = d3.scaleLinear().range([height-yearMargin.bottom, yearMargin.top]);
   
   var extent = d3.extent(data, function(d) { return d.year; });
   xScale.domain([new Date(extent[0], 0, 0), new Date(extent[1], 0, 0)]);
@@ -46,24 +51,37 @@ function drawYearData() {
     .attr("stroke", 'black')
     .attr("stroke-width", 1.5)
     .attr("d", biasLine);
+  
+  var zeroLine = d3.line()
+    .x(function(d, i) { return xScale(xScale.domain()[i]); })
+    .y(function(d, i) { return yScale(d); });
+  
+  bottomSvg.append("path")
+      .data([[0,0]])
+      .attr("d", zeroLine)
+      .attr("fill", "none")
+      .attr("stroke", "lightgray")
+      .attr("stroke-linecap", "butt")
+      .attr("stroke-dasharray", ("10,3"))
+      .attr("stroke-width", 1);
 	
   var xAxis = bottomSvg.append("g")
-		.attr("transform", "translate(0," +(height-margin.bottom) + ")")
+		.attr("transform", "translate(0," +(height-yearMargin.bottom) + ")")
 		.call(d3.axisBottom().scale(xScale));
 		
 	var yAxis = bottomSvg.append("g")
-		.attr("transform", "translate(" + margin.left + ",0)")
+		.attr("transform", "translate(" + yearMargin.left + ",0)")
 		.call(d3.axisLeft().scale(yScale));
 
 	bottomSvg.append("text")
 			 .text("Bias Score")
 			 .attr("text-anchor", "middle")
-			 .attr("transform", "translate(20," + (((height-margin.top-margin.bottom) / 2)+margin.top) + ") rotate(-90)");
+			 .attr("transform", "translate(20," + (((height-yearMargin.top-yearMargin.bottom) / 2)+yearMargin.top) + ") rotate(-90)");
 
 	bottomSvg.append("text")
 			 .text("Year")
 			 .attr("text-anchor", "middle")
-			 .attr("transform", "translate(" + (((width - margin.left - margin.right) / 2) + margin.left) + "," + height + ")")
+			 .attr("transform", "translate(" + (((width - yearMargin.left - yearMargin.right) / 2) + yearMargin.left) + "," + height + ")")
 }
 
 
@@ -81,12 +99,12 @@ function display_dates(){
       .text(roundDate(xScale.invert(s[0])))
       .attr("fill", "slategray")
       .attr("text-anchor", "start")
-      .attr("transform", "translate(" + s[0] + "," + (((height-margin.top-margin.bottom) / 2)+margin.top) + ")");
+      .attr("transform", "translate(" + s[0] + "," + (((height-yearMargin.top-yearMargin.bottom) / 2)+yearMargin.top) + ")");
     rDate = bottomSvg.append("text")
       .text(roundDate(xScale.invert(s[1])))
       .attr("fill", "slategray")
       .attr("text-anchor", "end")
-      .attr("transform", "translate(" + s[1] + "," + (((height-margin.top-margin.bottom) / 2)+margin.top) + ")");
+      .attr("transform", "translate(" + s[1] + "," + (((height-yearMargin.top-yearMargin.bottom) / 2)+yearMargin.top) + ")");
   }
 }
 

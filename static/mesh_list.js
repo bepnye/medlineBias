@@ -14,6 +14,11 @@ var yBottom;
 
 var diseases;
 
+var listMargin = {top : 40,
+              bottom: 20,
+              left : 20,
+              right: 20};
+
 function compare(a,b) {
   var biasA = Math.abs(a.bias);
   var biasB = Math.abs(b.bias);
@@ -29,8 +34,8 @@ function drawMeshData() {
 
   topSvg.call(d3.drag().on("drag", dragged).on("end", drag_ended));
 
-  var height = 600 - margin.top - margin.bottom;
-  var width = 900 - margin.left - margin.right;
+  var height = 600 - listMargin.top - listMargin.bottom;
+  var width = 900 - listMargin.left - listMargin.right;
   topSvg.attr('width', width);
   topSvg.attr('height', height);
 
@@ -44,18 +49,18 @@ function drawMeshData() {
 
 	xScale = d3.scaleLinear()
 		.domain([-1,1])
-		.range([margin.left, width-margin.right]);
+		.range([listMargin.left, width-listMargin.right]);
 	var xAxis = topSvg.append("g")
-		.attr("transform", "translate(0," + margin.top + ")")
+		.attr("transform", "translate(0," + listMargin.top + ")")
 		.call(d3.axisTop().scale(xScale));
 	topSvg.append("text")
 			 .text("Bias Score")
 			 .attr("text-anchor", "middle")
-			 .attr("transform", "translate(" + (((width - margin.left - margin.right) / 2) + margin.left) + ",10)")
+			 .attr("transform", "translate(" + (((width - listMargin.left - listMargin.right) / 2) + listMargin.left) + ",10)")
 		
 	barWidth = 20;
-	windowWidth = 6;
-	height_per_bar = (height-margin.top-margin.bottom)/windowWidth;
+	windowWidth = Math.floor((height-listMargin.top-listMargin.bottom)/(barWidth*1.5));
+	height_per_bar = (height-listMargin.top-listMargin.bottom)/windowWidth;
 	yTop = diseases.length;
 	yBottom = diseases.length-windowWidth;
 
@@ -83,7 +88,7 @@ function plot(){
   
   var yScale =  d3.scaleBand()
     .domain(diseases.slice(yBottom, yTop))
-    .range([height-margin.bottom, margin.top]);
+    .range([height-listMargin.bottom, listMargin.top]);
   yAxisL = topSvg.append("g")
     .attr("transform", "translate(" + xScale(0) + ",0)")
     .call(d3.axisLeft().scale(yScale));
