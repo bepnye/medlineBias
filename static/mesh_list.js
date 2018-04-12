@@ -1,4 +1,4 @@
-var height_per_bar = (height-margin.top-margin.bottom)/windowWidth
+var height_per_bar;
 var movement = 0;
 
 var xScale;
@@ -55,6 +55,7 @@ function drawMeshData() {
 		
 	barWidth = 20;
 	windowWidth = 6;
+	height_per_bar = (height-margin.top-margin.bottom)/windowWidth;
 	yTop = diseases.length;
 	yBottom = diseases.length-windowWidth;
 
