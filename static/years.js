@@ -9,6 +9,11 @@ var timeBrush = d3.brushX()
   .on("brush", display_dates)
   .on("end", brushed_time);
 
+function roundDate(date){
+  //average 365.2425 days in a year over full leap year cycle
+  return Math.round(date/(1000*60*60*24*365.2425))+1970
+}
+  
 function drawYearData() {
 
   bottomSvg.selectAll('*').remove();
@@ -24,16 +29,17 @@ function drawYearData() {
   });
   data.sort(function(a,b) {return a.year-b.year; });
 
-	xScale = d3.scaleLinear().range([margin.left, width-margin.right]);
+	xScale = d3.scaleTime().range([margin.left, width-margin.right]);
 	yScale = d3.scaleLinear().range([height-margin.bottom, margin.top]);
   
-  xScale.domain(d3.extent(data, function(d) { return d.year; }));
+  var extent = d3.extent(data, function(d) { return d.year; });
+  xScale.domain([new Date(extent[0], 0, 0), new Date(extent[1], 0, 0)]);
   yScale.domain([-1,1]);
 
   var biasLine = d3.line()
-      .x(function(d) { return xScale(d.year); })
+      .x(function(d) { return xScale(new Date(d.year, 0, 0)); })
       .y(function(d) { return yScale(d.bias); });
-
+  
   bottomSvg.append("path")
     .data([data])
     .attr("fill", "none")
@@ -72,12 +78,12 @@ function display_dates(){
   var s = d3.event.selection;
   if(s){
     lDate = bottomSvg.append("text")
-      .text(xScale.invert(s[0]))
+      .text(roundDate(xScale.invert(s[0])))
       .attr("fill", "slategray")
       .attr("text-anchor", "start")
       .attr("transform", "translate(" + s[0] + "," + (((height-margin.top-margin.bottom) / 2)+margin.top) + ")");
     rDate = bottomSvg.append("text")
-      .text(xScale.invert(s[1]))
+      .text(roundDate(xScale.invert(s[1])))
       .attr("fill", "slategray")
       .attr("text-anchor", "end")
       .attr("transform", "translate(" + s[1] + "," + (((height-margin.top-margin.bottom) / 2)+margin.top) + ")");
@@ -98,6 +104,6 @@ function brushed_time(){
   } else{
     time_range = [xScale.invert(s[0]), xScale.invert(s[1])];
   }
-  time_range[0] = time_range[0];
-  time_range[1] = time_range[1];
+  time_range[0] = roundDate(time_range[0]);
+  time_range[1] = roundDate(time_range[1]);
 }
