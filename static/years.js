@@ -124,4 +124,11 @@ function brushed_time(){
   }
   time_range[0] = roundDate(time_range[0]);
   time_range[1] = roundDate(time_range[1]);
+  newSelectedArticles = [];
+  yearData.forEach(function(d) {
+    if (time_range[0] <= d.year && d.year <= time_range[1]) {
+      newSelectedArticles = newSelectedArticles.concat(d.pmids);
+    }
+  });
+  updateSelectedArticles(newSelectedArticles);
 }

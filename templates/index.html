@@ -16,20 +16,20 @@
 		<script>var _meshToArticles = {{ data.mesh_to_pmids | safe }};</script>
 </head>
 <body>
-    <form action="">
-      <input type="radio" name="gender" value="" onclick="drawTree();"> Tree
-      <input type="radio" name="gender" value="" onclick="drawList();"> List
-    </form>
+  <input name="resetButton" type="button" id="resetButton" value="Reset Data" onclick="resetData()"/>
   <input name="meshButton" type="button" id="meshButton" value="Set Root Mesh" onclick="setRootMesh()"/>
   <input name="meshNode" type="text" maxlength="512" id="meshNode" value=""/>
-  <div id='top_div'>
-  </div>
-    <form action="">
-      <input type="radio" name="gender" value="" onclick="drawMap();"> Map
-      <input type="radio" name="gender" value="" onclick="drawTime();"> Time
-    </form>
-  <div id='bottom_div'>
-  </div>
+  <br>
+  <br>
+  <input type="button" id="treeButton" value="Tree" onclick="drawTree();"/>
+  <input type="button" id="listButton" value="List" onclick="drawList();"/>
+
+  <div id='top_div' class="plotDiv"></div>
+
+  <input type="button" id="mapButton" value="Map" onclick="drawMap();"/>
+  <input type="button" id="timeButton" value="Time" onclick="drawTime();"/>
+
+  <div id='bottom_div' class="plotDiv"></div>
 
 	<script src="{{url_for('static', filename='utils.js')}}"></script>
 	<script src="{{url_for('static', filename='mesh_tree.js')}}"></script>

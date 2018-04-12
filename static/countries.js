@@ -66,5 +66,17 @@ function drawCountryData() {
      } else {
        return 'grey';
      }
-   }); 
+   })
+   .on('mouseenter', function(d) {
+     if (countryData.has(d.id)) {
+        showCountryTooltip(d.id, d3.event.pageX+15, d3.event.pageY-25);
+     }
+   })
+   .on('mouseout', function(d) { hideCountryTooltip(); }) 
+   .on('dblclick', function(d) {
+     if (countryData.has(d.id)) {
+        selectedCountry = d.id;
+        updateSelectedArticles(countryData.get(d.id).pmids);
+     }
+     });
 }

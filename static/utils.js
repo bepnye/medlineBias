@@ -17,6 +17,24 @@ var bottomSvg = d3.select("#bottom_div").append("svg")
 		.attr("transform", "translate("
 					+ margin.left + "," + margin.top + ")");
 
+var topTooltip = d3.select("body")
+    .append("div")
+    .attr("id", "tooltip1")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden")
+    .style("background", "white")
+    .text("a simple tooltip");
+
+var bottomTooltip = d3.select("body")
+    .append("div")
+    .attr("id", "tooltip2")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden")
+    .style("background", "white")
+    .text("a simple tooltip");
+
 var countryDict = {
 	'ARGENTINA': 32,
 	'AUSTRALIA': 36,

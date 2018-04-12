@@ -19,16 +19,6 @@ var listMargin = {top : 40,
               left : 20,
               right: 20};
 
-function compare(a,b) {
-  var biasA = Math.abs(a.bias);
-  var biasB = Math.abs(b.bias);
-  if (biasA < biasB)
-    return -1;
-  if (biasA > biasB)
-    return 1;
-  return 0;
-}
-
 function drawMeshData() {
   topSvg.selectAll('*').remove();
 
@@ -40,7 +30,7 @@ function drawMeshData() {
   topSvg.attr('height', height);
 
 	data = meshData.slice();
-	data.sort(compare);
+	data.sort(function(a,b) { return a.selectedPmids.length > b.selectedPmids.length; });
 
 	diseases = [];
 	for (i = 0; i < data.length; i++) { 
@@ -62,7 +52,7 @@ function drawMeshData() {
 	windowWidth = Math.floor((height-listMargin.top-listMargin.bottom)/(barWidth*1.5));
 	height_per_bar = (height-listMargin.top-listMargin.bottom)/windowWidth;
 	yTop = diseases.length;
-	yBottom = diseases.length-windowWidth;
+	yBottom = Math.max(diseases.length-windowWidth, 0);
 
   plot();
 }
@@ -79,7 +69,7 @@ function plot(){
   }
 
   var fBiasDiseasesL = [];
-  for (i = yBottom; i < yTop; i++){
+  for (i = yBottom; i < Math.min(yTop, data.length); i++){
     if(data[i].bias < 0){
       fBiasDiseasesL.push(i-yBottom);
     }
@@ -138,7 +128,16 @@ function plot(){
       .attr("height", barWidth)
       .attr("stroke", "black")
       .attr("stroke-linejoin", "round")
-      .attr("fill", function(d) { return colorMap(d.bias);     })
+      .attr("fill", function(d) { return colorMap(d.bias); })
+      .on("mouseenter", function(d) {
+        showDiseaseTooltip(d.uid, margin.left, d3.event.pageY);
+      })
+      .on('mouseout', function(d) { hideDiseaseTooltip(); })
+      .on('dblclick', function(d) {
+        rootMesh = d.uid;
+        topPlot = TREE_PLOT;
+        updateSelectedMesh(getSubtreeMesh(rootMesh));
+        })
 }
 function dragged() {
   if (topPlot != LIST_PLOT) { return; }
@@ -159,7 +158,7 @@ function dragged() {
   if(yTop  < windowWidth){
     yTop = windowWidth
   }
-  yBottom = yTop-windowWidth;
+  yBottom = Math.max(yTop-windowWidth, 0);
   plot();
 }
 

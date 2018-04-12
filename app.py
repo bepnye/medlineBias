@@ -20,13 +20,17 @@ def import_csv(fname, split_fields = []):
   df_json = json.dumps(dicts, indent=2)
   return df_json
 
-@app.route("/")
-def index():
+data = {}
+def init_data():
+  global data
   data = {
     'mesh': import_csv('mesh.csv', ['treepos', 'children']),
     'mesh_to_pmids': import_csv('mesh_to_pmids.csv', ['pmids']),
     'articles': import_csv('articles.csv', ['mesh']),
   }
+
+@app.route("/")
+def index():
   return render_template("index.html", data=data)
 
 def csv_to_json(fname):
@@ -34,4 +38,5 @@ def csv_to_json(fname):
     return df_json
 
 if __name__ == "__main__":
+    init_data()
     app.run(host='0.0.0.0',port=5000,debug=True)

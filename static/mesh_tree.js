@@ -2,6 +2,7 @@ var meshToNode = function(source, m) {
   var node = {
     'bias': m.bias,
     'name': m.name,
+    'uid': m.uid,
     'parent': source.name,
     'children': [],
   }
@@ -28,10 +29,12 @@ function computeTreeData() {
   if (rootMesh) {
     var mesh = meshLookup.get(rootMesh);
     treeData.name = mesh.name;
+    treeData.uid = mesh.uid;
     treeData.bias = mesh.bias;
     children = mesh.children;
   } else {
     treeData.name = '';
+    treeData.uid = '';
     treeData.bias = 0.0;
     children = ['D000820', 'D001423', 'D002318', 'D004066',
                 'D004700', 'D005128', 'D005261', 'D006425',
@@ -108,7 +111,13 @@ function update(source) {
       .attr("transform", function(d) {
         return "translate(" + source.y0 + "," + source.x0 + ")";
     })
-    .on('click', click);
+    .on('click', click)
+    .on('mouseenter', function(d) {
+      showDiseaseTooltip(d.data.uid, d3.event.pageX+15, d3.event.pageY-25);
+    })
+    .on('mouseout', function(d) {
+      hideDiseaseTooltip();
+    });
 
   // Add Circle for the nodes
   nodeEnter.append('circle')
