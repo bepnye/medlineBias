@@ -11,6 +11,12 @@ d3.json("https://albertcheu.github.io/scratch/bostock_topo.json",function(err,wo
 function drawCountryData() {
 
     bottomSvg.selectAll('*').remove();
+	
+	var height = 600 - margin.top - margin.bottom;
+	var width = document.getElementById("bottom_div").clientWidth*0.95;
+	bottomSvg.attr('width', width);
+	bottomSvg.attr('height', height);
+	
     // Map and projection
     var path = d3.geoPath();
     var projection = d3.geoNaturalEarth()
@@ -36,7 +42,7 @@ function drawCountryData() {
         .call(legend);
         
     var projection = d3.geoKavrayskiy7()
-    .scale(170)
+    .scale(width / 5)
     .translate([width / 2, height / 2])
     .precision(.1);
 

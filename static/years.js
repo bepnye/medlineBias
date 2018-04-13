@@ -23,6 +23,11 @@ function drawYearData() {
 
   bottomSvg.selectAll('*').remove();
   bottomSvg.append("g").call(timeBrush);
+  
+  var height = 600 - margin.top - margin.bottom;
+  var width = document.getElementById("bottom_div").clientWidth*0.95;
+  bottomSvg.attr('width', width);
+  bottomSvg.attr('height', height);
 
   var data = [];
   yearData.forEach(function(d) {

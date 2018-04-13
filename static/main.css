@@ -1,8 +1,16 @@
+.container {
+  width: 100%;
+  height: 601px;
+  background-color: #eee;
+  clear: left;
+}
+
 .plotDiv {
-  width: 900px;
+  width: 50%;
   height: 600px;
   background-color: #eee;
   overflow: scroll;
+  float: left;
 }
 
 .plot {
