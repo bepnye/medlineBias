@@ -25,7 +25,7 @@ function drawMeshData() {
   topSvg.call(d3.drag().on("drag", dragged).on("end", drag_ended));
 
   var height = 600 - margin.top - margin.bottom;
-  var width = document.getElementById("top_div").clientWidth*0.95;
+  var width = document.getElementById("left_div").clientWidth*0.95;
   topSvg.attr('width', width);
   topSvg.attr('height', height);
 

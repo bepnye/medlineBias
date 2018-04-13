@@ -25,7 +25,7 @@ function drawYearData() {
   bottomSvg.append("g").call(timeBrush);
   
   var height = 600 - margin.top - margin.bottom;
-  var width = document.getElementById("bottom_div").clientWidth*0.95;
+  var width = document.getElementById("right_div").clientWidth*0.95;
   bottomSvg.attr('width', width);
   bottomSvg.attr('height', height);
 

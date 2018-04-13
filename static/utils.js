@@ -5,13 +5,13 @@ var margin = {top: 20, right: 20, bottom: 20, left: 20},
 var colorMap = d3.scaleSequential(d3.interpolateRdBu)
     .domain([-1, 1]);
 
-var topSvg = d3.select("#top_div").append("svg")
+var topSvg = d3.select("#left_div").append("svg")
 		.attr("width", width)
 		.attr("height", height)
 		.attr("transform", "translate("
 					+ margin.left + "," + margin.top + ")");
 
-var bottomSvg = d3.select("#bottom_div").append("svg")
+var bottomSvg = d3.select("#right_div").append("svg")
 		.attr("width", width)
 		.attr("height", height)
 		.attr("transform", "translate("
