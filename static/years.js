@@ -21,13 +21,13 @@ function roundDate(date){
   
 function drawYearData() {
 
-  bottomSvg.selectAll('*').remove();
-  bottomSvg.append("g").call(timeBrush);
+  rightSvg.selectAll('*').remove();
+  rightSvg.append("g").call(timeBrush);
   
   var height = 600 - margin.top - margin.bottom;
   var width = document.getElementById("right_div").clientWidth*0.95;
-  bottomSvg.attr('width', width);
-  bottomSvg.attr('height', height);
+  rightSvg.attr('width', width);
+  rightSvg.attr('height', height);
 
   var data = [];
   yearData.forEach(function(d) {
@@ -50,7 +50,7 @@ function drawYearData() {
       .x(function(d) { return xScale(new Date(d.year, 0, 0)); })
       .y(function(d) { return yScale(d.bias); });
   
-  bottomSvg.append("path")
+  rightSvg.append("path")
     .data([data])
     .attr("fill", "none")
     .attr("stroke", 'black')
@@ -61,7 +61,7 @@ function drawYearData() {
     .x(function(d, i) { return xScale(xScale.domain()[i]); })
     .y(function(d, i) { return yScale(d); });
   
-  bottomSvg.append("path")
+  rightSvg.append("path")
       .data([[0,0]])
       .attr("d", zeroLine)
       .attr("fill", "none")
@@ -70,20 +70,20 @@ function drawYearData() {
       .attr("stroke-dasharray", ("10,3"))
       .attr("stroke-width", 1);
 	
-  var xAxis = bottomSvg.append("g")
+  var xAxis = rightSvg.append("g")
 		.attr("transform", "translate(0," +(height-yearMargin.bottom) + ")")
 		.call(d3.axisBottom().scale(xScale));
 		
-	var yAxis = bottomSvg.append("g")
+	var yAxis = rightSvg.append("g")
 		.attr("transform", "translate(" + yearMargin.left + ",0)")
 		.call(d3.axisLeft().scale(yScale));
 
-	bottomSvg.append("text")
+	rightSvg.append("text")
 			 .text("Bias Score")
 			 .attr("text-anchor", "middle")
 			 .attr("transform", "translate(20," + (((height-yearMargin.top-yearMargin.bottom) / 2)+yearMargin.top) + ") rotate(-90)");
 
-	bottomSvg.append("text")
+	rightSvg.append("text")
 			 .text("Year")
 			 .attr("text-anchor", "middle")
 			 .attr("transform", "translate(" + (((width - yearMargin.left - yearMargin.right) / 2) + yearMargin.left) + "," + height + ")")
@@ -100,12 +100,12 @@ function display_dates(){
   }
   var s = d3.event.selection;
   if(s){
-    lDate = bottomSvg.append("text")
+    lDate = rightSvg.append("text")
       .text(roundDate(xScale.invert(s[0])))
       .attr("fill", "slategray")
       .attr("text-anchor", "start")
       .attr("transform", "translate(" + s[0] + "," + (((height-yearMargin.top-yearMargin.bottom) / 2)+yearMargin.top) + ")");
-    rDate = bottomSvg.append("text")
+    rDate = rightSvg.append("text")
       .text(roundDate(xScale.invert(s[1])))
       .attr("fill", "slategray")
       .attr("text-anchor", "end")

@@ -20,14 +20,14 @@ var listMargin = {top : 40,
               right: 20};
 
 function drawMeshData() {
-  topSvg.selectAll('*').remove();
+  leftSvg.selectAll('*').remove();
 
-  topSvg.call(d3.drag().on("drag", dragged).on("end", drag_ended));
+  leftSvg.call(d3.drag().on("drag", dragged).on("end", drag_ended));
 
   var height = 600 - margin.top - margin.bottom;
   var width = document.getElementById("left_div").clientWidth*0.95;
-  topSvg.attr('width', width);
-  topSvg.attr('height', height);
+  leftSvg.attr('width', width);
+  leftSvg.attr('height', height);
 
 	data = meshData.slice();
 	data.sort(function(a,b) { return a.selectedPmids.length > b.selectedPmids.length; });
@@ -40,10 +40,10 @@ function drawMeshData() {
 	xScale = d3.scaleLinear()
 		.domain([-1,1])
 		.range([listMargin.left, width-listMargin.right]);
-	var xAxis = topSvg.append("g")
+	var xAxis = leftSvg.append("g")
 		.attr("transform", "translate(0," + listMargin.top + ")")
 		.call(d3.axisTop().scale(xScale));
-	topSvg.append("text")
+	leftSvg.append("text")
 			 .text("Bias Score")
 			 .attr("text-anchor", "middle")
 			 .attr("transform", "translate(" + (((width - listMargin.left - listMargin.right) / 2) + listMargin.left) + ",10)")
@@ -79,10 +79,10 @@ function plot(){
   var yScale =  d3.scaleBand()
     .domain(diseases.slice(yBottom, yTop))
     .range([height-listMargin.bottom, listMargin.top]);
-  yAxisL = topSvg.append("g")
+  yAxisL = leftSvg.append("g")
     .attr("transform", "translate(" + xScale(0) + ",0)")
     .call(d3.axisLeft().scale(yScale));
-  yAxisR = topSvg.append("g")
+  yAxisR = leftSvg.append("g")
     .attr("transform", "translate(" + xScale(0) + ",0)")
     .call(d3.axisRight().scale(yScale));
   
@@ -109,7 +109,7 @@ function plot(){
       })
     .remove();
   
-  bars = topSvg.selectAll("rect")
+  bars = leftSvg.selectAll("rect")
     .data(data)
     .enter()
     .filter(function(d, i) { return yScale(d.name); })

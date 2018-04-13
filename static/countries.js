@@ -10,12 +10,12 @@ d3.json("https://albertcheu.github.io/scratch/bostock_topo.json",function(err,wo
  
 function drawCountryData() {
 
-    bottomSvg.selectAll('*').remove();
+    rightSvg.selectAll('*').remove();
 	
 	var height = 600 - margin.top - margin.bottom;
 	var width = document.getElementById("right_div").clientWidth*0.95;
-	bottomSvg.attr('width', width);
-	bottomSvg.attr('height', height);
+	rightSvg.attr('width', width);
+	rightSvg.attr('height', height);
 	
     // Map and projection
     var path = d3.geoPath();
@@ -25,7 +25,7 @@ function drawCountryData() {
     var path = d3.geoPath()
         .projection(projection);
 
-    var g = bottomSvg.append("g")
+    var g = rightSvg.append("g")
         .attr("class", "legendThreshold")
         .attr("transform", "translate(20,20)");
     g.append("text")
@@ -38,7 +38,7 @@ function drawCountryData() {
         .labels(function (d) { return labels[d.i]; })
         .shapePadding(4)
         .scale(colorMap);
-    bottomSvg.select(".legendThreshold")
+    rightSvg.select(".legendThreshold")
         .call(legend);
         
     var projection = d3.geoKavrayskiy7()
@@ -53,7 +53,7 @@ function drawCountryData() {
     // Draw the map
       
       
-    	bottomSvg.selectAll(".country")
+    	rightSvg.selectAll(".country")
       // the data(countries) bind the map data "countries" to the selected oject that have class".country" 
       .data(countries)
       // currently the slection is empty while the data isn't ,thus there is a mismatch,
