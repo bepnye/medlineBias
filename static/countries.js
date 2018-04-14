@@ -24,22 +24,6 @@ function drawCountryData() {
         .translate([width / 2, height / 2])
     var path = d3.geoPath()
         .projection(projection);
-
-    var g = rightSvg.append("g")
-        .attr("class", "legendThreshold")
-        .attr("transform", "translate(20,20)");
-    g.append("text")
-        .attr("class", "caption")
-        .attr("x", 0)
-        .attr("y", -6)
-        .text("Gender Bias");
-    var labels = ['< -0.3', '-0.3 ~ -0.2', '-0.2 ~ -0.1','-0.1 ~ 0.1', '0.1 ~ 0.2','0.2 ~ 0.3', '> 0.3'];
-    var legend = d3.legendColor()
-        .labels(function (d) { return labels[d.i]; })
-        .shapePadding(4)
-        .scale(colorMap);
-    rightSvg.select(".legendThreshold")
-        .call(legend);
         
     var projection = d3.geoKavrayskiy7()
     .scale(width / 5)

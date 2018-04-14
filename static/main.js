@@ -310,6 +310,7 @@ function init() {
   computeAllData();
   drawTree();
   drawTime();
+  drawToolbar();
 }
 
 //console.log(articleData);

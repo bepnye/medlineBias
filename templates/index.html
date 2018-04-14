@@ -16,28 +16,30 @@
 		<script>var _meshToArticles = {{ data.mesh_to_pmids | safe }};</script>
 </head>
 <body>
-  <div style="float: left;">
+  <div>
     <input name="resetButton" type="button" id="resetButton" value="Reset Data" onclick="resetData()"/>
     <input name="meshButton" type="button" id="meshButton" value="Set Root Mesh" onclick="setRootMesh()"/>
     <input name="meshNode" type="text" maxlength="512" id="meshNode" value=""/>
     <br>
     <br>
-    <input type="button" id="treeButton" value="Tree" onclick="drawTree();"/>
-    <input type="button" id="listButton" value="List" onclick="drawList();"/>
-  </div>
-  <div style="position:absolute; left:50%;">
-    <br>
-    <br>
-    <input type="button" id="mapButton" value="Map" onclick="drawMap();"/>
-    <input type="button" id="timeButton" value="Time" onclick="drawTime();"/>
+	<div style="position:absolute; left:0%;">
+      <input type="button" id="treeButton" value="Tree" onclick="drawTree();"/>
+      <input type="button" id="listButton" value="List" onclick="drawList();"/>
+	</div>
+    <div style="position:relative; left:50%;">
+      <input type="button" id="mapButton" value="Map" onclick="drawMap();"/>
+      <input type="button" id="timeButton" value="Time" onclick="drawTime();"/>
+    </div>
   </div>
 
   <div class="container">
       <div id='left_div' class="plotDiv"></div>
 	  <div id='right_div' class="plotDiv"></div>
   </div>
+  <div id='toolBar_div' class="toolBar"></div>
 
 	<script src="{{url_for('static', filename='utils.js')}}"></script>
+	<script src="{{url_for('static', filename='toolbar.js')}}"></script>
 	<script src="{{url_for('static', filename='mesh_tree.js')}}"></script>
 	<script src="{{url_for('static', filename='mesh_list.js')}}"></script>
 	<script src="{{url_for('static', filename='years.js')}}"></script>

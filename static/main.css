@@ -5,6 +5,11 @@
   clear: left;
 }
 
+.toolBar {
+  width: 100%;
+  height: 200px;
+}
+
 .plotDiv {
   width: 50%;
   height: 600px;

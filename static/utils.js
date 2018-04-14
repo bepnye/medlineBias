@@ -16,6 +16,11 @@ var rightSvg = d3.select("#right_div").append("svg")
 		.attr("height", height)
 		.attr("transform", "translate("
 					+ margin.left + "," + margin.top + ")");
+					
+var toolbarSvg = d3.select("#toolBar_div").append("svg")
+		.attr("width", document.getElementById("toolBar_div").clientWidth)
+		.attr("height", height)
+
 
 var topTooltip = d3.select("body")
     .append("div")
