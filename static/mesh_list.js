@@ -19,8 +19,12 @@ var listMargin = {top : 40,
               left : 20,
               right: 20};
 
+var comparator = orderArticleCount;	  
+			  
 function drawMeshData() {
   leftSvg.selectAll('*').remove();
+  
+  d3.select("#orderRadio").style("visibility", "visible")
 
   leftSvg.call(d3.drag().on("drag", dragged).on("end", drag_ended));
 
@@ -30,7 +34,7 @@ function drawMeshData() {
   leftSvg.attr('height', height);
 
 	data = meshData.slice();
-	data.sort(function(a,b) { return a.selectedPmids.length > b.selectedPmids.length; });
+	data.sort(comparator);
 
 	diseases = [];
 	for (i = 0; i < data.length; i++) { 
@@ -165,4 +169,49 @@ function dragged() {
 function drag_ended() {
   if (topPlot != LIST_PLOT) { return; }
   movement = 0;
+}
+
+function selectOrdering(comp){
+	comparator = comp;
+	drawMeshData();
+}
+
+function orderArticleCount(a,b) {
+  var countA = a.selectedPmids.length;
+  var countB = b.selectedPmids.length;
+  if (countA < countB)
+    return -1;
+  if (countA > countB)
+    return 1;
+  return 0;
+}
+
+function orderBiasMag(a,b) {
+  var biasA = Math.abs(a.bias);
+  var biasB = Math.abs(b.bias);
+  if (biasA < biasB)
+    return -1;
+  if (biasA > biasB)
+    return 1;
+  return 0;
+}
+
+function orderBiasMale(a,b) {
+  var biasA = a.bias;
+  var biasB = b.bias;
+  if (biasA < biasB)
+    return -1;
+  if (biasA > biasB)
+    return 1;
+  return 0;
+}
+
+function orderBiasFemale(a,b) {
+  var biasA = a.bias;
+  var biasB = b.bias;
+  if (biasA > biasB)
+    return -1;
+  if (biasA < biasB)
+    return 1;
+  return 0;
 }

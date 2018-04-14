@@ -33,8 +33,16 @@
   </div>
 
   <div class="container">
-      <div id='left_div' class="plotDiv"></div>
-	  <div id='right_div' class="plotDiv"></div>
+    <div id='left_div' class="plotDiv"></div>
+	<div id='right_div' class="plotDiv"></div>
+  </div>
+  <div id='orderRadio' style="float:left; visibility: hidden;">
+    Sort List By:
+	<br>
+    <input type="radio" name="order" checked = "checked" onclick="selectOrdering(orderArticleCount);"/> : Number of Articles<br />
+    <input type="radio" name="order" onclick="selectOrdering(orderBiasMag);"/> : Bias Magnitude<br />
+    <input type="radio" name="order" onclick="selectOrdering(orderBiasMale);"/> : Bias Toward Males<br />
+    <input type="radio" name="order" onclick="selectOrdering(orderBiasFemale);"/> : Bias Toward Females<br />
   </div>
   <div id='toolBar_div' class="toolBar"></div>
 

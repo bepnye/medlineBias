@@ -60,6 +60,8 @@ var i = 0,
 function drawTreeData() {
 
   leftSvg.selectAll('*').remove();
+  
+  d3.select("#orderRadio").style("visibility", "hidden")
 
   var height = 600 - margin.top - margin.bottom;
   var width = 3000 - margin.left - margin.right;
