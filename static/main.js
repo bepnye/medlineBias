@@ -226,6 +226,7 @@ function refreshPlots() {
   } else {
     drawMap();
   }
+  drawToolbar();
 }
 
 function resetData() {

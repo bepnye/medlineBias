@@ -1,5 +1,7 @@
 function drawToolbar(){
-	var margin = {right: 50, left: 50};
+	toolbarSvg.selectAll('*').remove();
+	
+	var margin = {right: 30, left: 30};
 	var width = document.getElementById("toolBar_div").clientWidth-margin.right-margin.left;
 	
 	var linearGradient = toolbarSvg.append("defs")
@@ -31,4 +33,21 @@ function drawToolbar(){
 	var xAxis = toolbarSvg.append("g")
 		.attr("transform", "translate(" + margin.left + "," + 20 + ")")
 		.call(d3.axisBottom().scale(labelScale));
+	
+	if(rootMesh){ var rootName = meshLookup.get(rootMesh).name; }
+	else{ var rootName = meshLookup.get('D009358').name; }
+	if(selectedCountry){var country = countryData.get(selectedCountry).names.values().next().value; }
+	else{var country = "all nations"; }
+	toolbarSvg.append("text")
+		.text("Dislaying information for:")
+		.attr("transform", "translate(" + margin.left + "," + 50 + ")");
+	toolbarSvg.append("text")
+		.text(rootName +";")
+		.attr("transform", "translate(" + margin.left + "," + 70 + ")");
+	toolbarSvg.append("text")
+		.text(time_range[0] + " to " + time_range[1] + ";")
+		.attr("transform", "translate(" + margin.left + "," + 90 + ")");
+	toolbarSvg.append("text")
+		.text(country)
+		.attr("transform", "translate(" + margin.left + "," + 110 + ")");
 }

@@ -42,8 +42,8 @@ function drawYearData() {
 	xScale = d3.scaleTime().range([yearMargin.left, width-yearMargin.right]);
 	yScale = d3.scaleLinear().range([height-yearMargin.bottom, yearMargin.top]);
   
-  var extent = d3.extent(data, function(d) { return d.year; });
-  xScale.domain([new Date(extent[0], 0, 0), new Date(extent[1], 0, 0)]);
+  time_range = d3.extent(data, function(d) { return d.year; });
+  xScale.domain([new Date(time_range[0], 0, 0), new Date(time_range[1], 0, 0)]);
   yScale.domain([-1,1]);
 
   var biasLine = d3.line()
