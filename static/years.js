@@ -52,6 +52,8 @@ function drawYearData() {
   yScaleYear.domain([-1,1]);
   yScaleArt.domain([0, d3.extent(data, function(d) { return d.art })[1]]);
 
+  console.log(data);
+  
   var barWidth = 8;
   var bars = rightSvg.selectAll("rect.bar")
      .data(data)

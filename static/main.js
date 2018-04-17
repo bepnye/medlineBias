@@ -129,11 +129,6 @@ function computeYearData() {
   });
   var yi = d3.min(years);
   var yf = d3.max(years);
-  for (i = yi; i < yf; i++) {
-    if (!yearData.has(i)) {
-      yearData.set(i, { 'pmids': [], 'year': i, 'bias': 0.0 });
-    }
-  }
   console.log('done!');
   return Array.from(yearData.values());
 }
