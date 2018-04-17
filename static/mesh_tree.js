@@ -60,6 +60,9 @@ var i = 0,
 function drawTreeData() {
 
   leftSvg.selectAll('*').remove();
+  if(axisDiv){
+	  axisDiv.remove();
+  }
   
   d3.select("#orderRadio").style("visibility", "hidden")
 
