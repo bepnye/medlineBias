@@ -22,6 +22,11 @@ function roundDate(date){
 function drawYearData() {
 
   rightSvg.selectAll('*').remove();
+  rightSvg.call(d3.zoom().on("zoom", null));
+  if(d3.event){
+    d3.event.transform = d3.zoomIdentity;
+  }
+  rightSvg.attr("transform", d3.zoomIdentity);
   rightSvg.append("g").call(timeBrush);
   
   var height = 600 - margin.top - margin.bottom;

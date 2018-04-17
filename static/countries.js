@@ -7,10 +7,12 @@ d3.json("https://albertcheu.github.io/scratch/bostock_topo.json",function(err,wo
   countries = topojson.feature(world, world.objects.countries).features,
   neighbors = topojson.neighbors(world.objects.countries.geometries);
 });
- 
-function drawCountryData() {
 
-    rightSvg.selectAll('*').remove();
+function drawCountryData() {
+	rightSvg.selectAll('*').remove();
+	var zoom = d3.zoom().on("zoom", function () { rightSvg.attr("transform", d3.zoomIdentity.scale(d3.event.transform.k))});
+	rightSvg.call(zoom);
+	zoom.scaleTo(rightSvg, 1);
 	
 	var height = 600 - margin.top - margin.bottom;
 	var width = document.getElementById("right_div").clientWidth*0.95;
@@ -24,9 +26,9 @@ function drawCountryData() {
         .translate([width / 2, height / 2])
     var path = d3.geoPath()
         .projection(projection);
-        
+    
     var projection = d3.geoKavrayskiy7()
-    .scale(width / 5)
+    .scale((width / 5))
     .translate([width / 2, height / 2])
     .precision(.1);
 
