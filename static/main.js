@@ -15,8 +15,8 @@ _articleData.forEach(function(a) {
 });
 _meshToArticles.forEach(function(d) {
   meshLookup.get(d.uid).pmids = d.pmids.filter(function (p) { return p != ""; });
-  meshLookup.get(d.uid).selectedPmids = meshLookup.get(d.uid).pmids;
-  meshLookup.get(d.uid).bias = 0.0;
+  //meshLookup.get(d.uid).selectedPmids = meshLookup.get(d.uid).pmids;
+  //meshLookup.get(d.uid).bias = 0.0;
 });
 
 console.log(meshLookup);
@@ -42,6 +42,8 @@ var treeData;
 var meshData;
 var yearData;
 var countryData;
+
+var filters = [];
 
 function getSubtreeMesh(root) {
   var queue = [root];
@@ -105,7 +107,7 @@ function updateMeshBias() {
   console.log('Updating mesh bias...');
   var curArticles = new Set(selectedArticles);
   meshLookup.forEach(function(m, ui, map) {
-    var pmids = m.pmids.filter(function(pmid) { return curArticles.has(pmid); });
+    var pmids = m.subPmids.filter(function(pmid) { return curArticles.has(pmid); });
     m.selectedPmids = pmids;
     m.bias = getBiasFromPmids(pmids);
   });
@@ -213,6 +215,12 @@ function setRootMesh() {
     // Get ids for all the subtree mesh terms
     updateSelectedMesh(getSubtreeMesh(rootMesh));
   }
+}
+
+function selectCountries(countryId) {
+  filters.push({'name': 'Country = '+countryId, 'fn': function (
+  selectedCountry = d.id;
+  updateSelectedArticles(countryData.get(d.id).pmids);
 }
 
 function refreshPlots() {

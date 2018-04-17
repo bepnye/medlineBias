@@ -1,5 +1,20 @@
-.plotDiv {
-  width: 900px;
+.container {
+  width: 90%;
+  height: 800px;
+  margin: auto;
+  padding: 10px;
+  background: aqua;
+}
+
+.topDiv {
+  width: 48%;
+  height: 600px;
+  background-color: #eee;
+  overflow: scroll;
+  float: left;
+}
+.bottomDiv {
+  margin-left: 52%;
   height: 600px;
   background-color: #eee;
   overflow: scroll;

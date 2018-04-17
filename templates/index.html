@@ -3,11 +3,16 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<script src="http://d3js.org/d3.v4.min.js"></script>
-<script src="https://d3js.org/d3-scale-chromatic.v0.3.min.js"></script>
-<script src="//d3js.org/topojson.v1.min.js"></script>
-<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>
+<!--<script src="http://d3js.org/d3.v4.min.js"></script>-->
+<!--<script src="https://d3js.org/d3-scale-chromatic.v0.3.min.js"></script>-->
+<!--<script src="https://d3js.org/topojson.v1.min.js"></script>-->
+<!--<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>-->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>-->
+<script src="{{url_for('static', filename='lib/d3.v4.min.js')}}"></script>
+<script src="{{url_for('static', filename='lib/d3-scale-chromatic.v0.3.min.js')}}"></script>
+<script src="{{url_for('static', filename='lib/topojson.v1.min.js')}}"></script>
+<script src="{{url_for('static', filename='lib/d3-geo-projection.v2.min.js')}}"></script>
+<script src="{{url_for('static', filename='lib/d3-legend.js')}}"></script>
 
 <head>
     <meta charset="utf-8">
@@ -16,20 +21,21 @@
 		<script>var _meshToArticles = {{ data.mesh_to_pmids | safe }};</script>
 </head>
 <body>
-  <input name="resetButton" type="button" id="resetButton" value="Reset Data" onclick="resetData()"/>
-  <input name="meshButton" type="button" id="meshButton" value="Set Root Mesh" onclick="setRootMesh()"/>
-  <input name="meshNode" type="text" maxlength="512" id="meshNode" value=""/>
+
+  <div id="buttonDiv">
+    <input name="resetButton" type="button" id="resetButton" value="Reset Data" onclick="resetData()"/>
+    <input name="meshButton" type="button" id="meshButton" value="Set Root Mesh" onclick="setRootMesh()"/>
+    <input name="meshNode" type="text" maxlength="512" id="meshNode" value=""/>
+    <input type="button" id="treeButton" value="Tree" onclick="drawTree();"/>
+    <input type="button" id="listButton" value="List" onclick="drawList();"/>
+    <input type="button" id="mapButton" value="Map" onclick="drawMap();"/>
+    <input type="button" id="timeButton" value="Time" onclick="drawTime();"/>
+  </div>
+
   <br>
-  <br>
-  <input type="button" id="treeButton" value="Tree" onclick="drawTree();"/>
-  <input type="button" id="listButton" value="List" onclick="drawList();"/>
 
-  <div id='top_div' class="plotDiv"></div>
-
-  <input type="button" id="mapButton" value="Map" onclick="drawMap();"/>
-  <input type="button" id="timeButton" value="Time" onclick="drawTime();"/>
-
-  <div id='bottom_div' class="plotDiv"></div>
+  <div id='top_div' class="topDiv"></div>
+  <div id='bottom_div' class="bottomDiv"></div>
 
 	<script src="{{url_for('static', filename='utils.js')}}"></script>
 	<script src="{{url_for('static', filename='mesh_tree.js')}}"></script>

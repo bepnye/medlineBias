@@ -75,8 +75,7 @@ function drawCountryData() {
    .on('mouseout', function(d) { hideCountryTooltip(); }) 
    .on('dblclick', function(d) {
      if (countryData.has(d.id)) {
-        selectedCountry = d.id;
-        updateSelectedArticles(countryData.get(d.id).pmids);
+       selectCountry(d.id);
      }
      });
 }

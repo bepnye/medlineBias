@@ -1,6 +1,7 @@
 var meshToNode = function(source, m) {
   var node = {
     'bias': m.bias,
+    'size': m.subs.length,
     'name': m.name,
     'uid': m.uid,
     'parent': source.name,
@@ -22,7 +23,8 @@ function computeTreeData() {
   var treeData = {
     'parent': 'null',
     'depth': 0,
-    'children': []
+    'children': [],
+    'relativeSize': 1,
     }
   var children;
 
@@ -31,11 +33,13 @@ function computeTreeData() {
     treeData.name = mesh.name;
     treeData.uid = mesh.uid;
     treeData.bias = mesh.bias;
+    treeData.size = mesh.subs.length;
     children = mesh.children;
   } else {
     treeData.name = '';
     treeData.uid = '';
     treeData.bias = 0.0;
+    treeData.size = meshLookup.size;
     children = ['D000820', 'D001423', 'D002318', 'D004066',
                 'D004700', 'D005128', 'D005261', 'D006425',
                 'D007154', 'D007280', 'D009057', 'D009140',
@@ -97,7 +101,8 @@ function update(source) {
       links = treeData.descendants().slice(1);
 
   // Normalize for fixed-depth.
-  nodes.forEach(function(d){ d.y = d.depth * 180 + 50});
+  //nodes.forEach(function(d){ d.y = d.depth * 180 + 50});
+  nodes.forEach(function(d){ d.y = 50 + d.depth*180; });
 
   // ****************** Nodes section ***************************
 
@@ -113,6 +118,7 @@ function update(source) {
     })
     .on('click', click)
     .on('mouseenter', function(d) {
+      console.log(source.data.size);
       showDiseaseTooltip(d.data.uid, d3.event.pageX+15, d3.event.pageY-25);
     })
     .on('mouseout', function(d) {
