@@ -15,9 +15,16 @@
 }
 .bottomDiv {
   margin-left: 52%;
-  height: 600px;
+  width: 100%;
+  height: 601px;
   background-color: #eee;
-  overflow: scroll;
+  clear: left;
+}
+
+.toolBar {
+  width: 33%;
+  height: 200px;
+  float: left
 }
 
 .plot {

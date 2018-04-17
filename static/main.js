@@ -234,6 +234,7 @@ function refreshPlots() {
   } else {
     drawMap();
   }
+  drawToolbar();
 }
 
 function resetData() {
@@ -318,6 +319,7 @@ function init() {
   computeAllData();
   drawTree();
   drawTime();
+  drawToolbar();
 }
 
 //console.log(articleData);

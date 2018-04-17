@@ -7,10 +7,18 @@ d3.json("https://albertcheu.github.io/scratch/bostock_topo.json",function(err,wo
   countries = topojson.feature(world, world.objects.countries).features,
   neighbors = topojson.neighbors(world.objects.countries.geometries);
 });
- 
-function drawCountryData() {
 
-    bottomSvg.selectAll('*').remove();
+function drawCountryData() {
+	rightSvg.selectAll('*').remove();
+	var zoom = d3.zoom().on("zoom", function () { rightSvg.attr("transform", d3.zoomIdentity.scale(d3.event.transform.k))});
+	rightSvg.call(zoom);
+	zoom.scaleTo(rightSvg, 1);
+	
+	var height = 600 - margin.top - margin.bottom;
+	var width = document.getElementById("right_div").clientWidth*0.95;
+	rightSvg.attr('width', width);
+	rightSvg.attr('height', height);
+	
     // Map and projection
     var path = d3.geoPath();
     var projection = d3.geoNaturalEarth()
@@ -18,25 +26,9 @@ function drawCountryData() {
         .translate([width / 2, height / 2])
     var path = d3.geoPath()
         .projection(projection);
-
-    var g = bottomSvg.append("g")
-        .attr("class", "legendThreshold")
-        .attr("transform", "translate(20,20)");
-    g.append("text")
-        .attr("class", "caption")
-        .attr("x", 0)
-        .attr("y", -6)
-        .text("Gender Bias");
-    var labels = ['< -0.3', '-0.3 ~ -0.2', '-0.2 ~ -0.1','-0.1 ~ 0.1', '0.1 ~ 0.2','0.2 ~ 0.3', '> 0.3'];
-    var legend = d3.legendColor()
-        .labels(function (d) { return labels[d.i]; })
-        .shapePadding(4)
-        .scale(colorMap);
-    bottomSvg.select(".legendThreshold")
-        .call(legend);
-        
+    
     var projection = d3.geoKavrayskiy7()
-    .scale(170)
+    .scale((width / 5))
     .translate([width / 2, height / 2])
     .precision(.1);
 
@@ -47,7 +39,7 @@ function drawCountryData() {
     // Draw the map
       
       
-    	bottomSvg.selectAll(".country")
+    	rightSvg.selectAll(".country")
       // the data(countries) bind the map data "countries" to the selected oject that have class".country" 
       .data(countries)
       // currently the slection is empty while the data isn't ,thus there is a mismatch,

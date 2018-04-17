@@ -63,12 +63,14 @@ var i = 0,
 
 function drawTreeData() {
 
-  topSvg.selectAll('*').remove();
+  leftSvg.selectAll('*').remove();
+  
+  d3.select("#orderRadio").style("visibility", "hidden")
 
   var height = 600 - margin.top - margin.bottom;
   var width = 3000 - margin.left - margin.right;
-  topSvg.attr('width', width);
-  topSvg.attr('height', height);
+  leftSvg.attr('width', width);
+  leftSvg.attr('height', height);
 	// declares a tree layout and assigns the size
 	treemap = d3.tree().size([height, width]);
 
@@ -107,7 +109,7 @@ function update(source) {
   // ****************** Nodes section ***************************
 
   // Update the nodes...
-  var node = topSvg.selectAll('g.node')
+  var node = leftSvg.selectAll('g.node')
       .data(nodes, function(d) {return d.id || (d.id = ++i); });
 
   // Enter any new modes at the parent's previous position.
@@ -189,7 +191,7 @@ function update(source) {
   // ****************** links section ***************************
 
   // Update the links...
-  var link = topSvg.selectAll('path.link')
+  var link = leftSvg.selectAll('path.link')
       .data(links, function(d) { return d.id; });
 
   // Enter any new links at the parent's previous position.

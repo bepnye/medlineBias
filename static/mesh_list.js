@@ -19,18 +19,22 @@ var listMargin = {top : 40,
               left : 20,
               right: 20};
 
+var comparator = orderArticleCount;	  
+			  
 function drawMeshData() {
-  topSvg.selectAll('*').remove();
+  leftSvg.selectAll('*').remove();
+  
+  d3.select("#orderRadio").style("visibility", "visible")
 
-  topSvg.call(d3.drag().on("drag", dragged).on("end", drag_ended));
+  leftSvg.call(d3.drag().on("drag", dragged).on("end", drag_ended));
 
-  var height = 600 - listMargin.top - listMargin.bottom;
-  var width = 900 - listMargin.left - listMargin.right;
-  topSvg.attr('width', width);
-  topSvg.attr('height', height);
+  var height = 600 - margin.top - margin.bottom;
+  var width = document.getElementById("left_div").clientWidth*0.95;
+  leftSvg.attr('width', width);
+  leftSvg.attr('height', height);
 
 	data = meshData.slice();
-	data.sort(function(a,b) { return a.selectedPmids.length > b.selectedPmids.length; });
+	data.sort(comparator);
 
 	diseases = [];
 	for (i = 0; i < data.length; i++) { 
@@ -40,10 +44,10 @@ function drawMeshData() {
 	xScale = d3.scaleLinear()
 		.domain([-1,1])
 		.range([listMargin.left, width-listMargin.right]);
-	var xAxis = topSvg.append("g")
+	var xAxis = leftSvg.append("g")
 		.attr("transform", "translate(0," + listMargin.top + ")")
 		.call(d3.axisTop().scale(xScale));
-	topSvg.append("text")
+	leftSvg.append("text")
 			 .text("Bias Score")
 			 .attr("text-anchor", "middle")
 			 .attr("transform", "translate(" + (((width - listMargin.left - listMargin.right) / 2) + listMargin.left) + ",10)")
@@ -79,10 +83,10 @@ function plot(){
   var yScale =  d3.scaleBand()
     .domain(diseases.slice(yBottom, yTop))
     .range([height-listMargin.bottom, listMargin.top]);
-  yAxisL = topSvg.append("g")
+  yAxisL = leftSvg.append("g")
     .attr("transform", "translate(" + xScale(0) + ",0)")
     .call(d3.axisLeft().scale(yScale));
-  yAxisR = topSvg.append("g")
+  yAxisR = leftSvg.append("g")
     .attr("transform", "translate(" + xScale(0) + ",0)")
     .call(d3.axisRight().scale(yScale));
   
@@ -109,7 +113,7 @@ function plot(){
       })
     .remove();
   
-  bars = topSvg.selectAll("rect")
+  bars = leftSvg.selectAll("rect")
     .data(data)
     .enter()
     .filter(function(d, i) { return yScale(d.name); })
@@ -165,4 +169,49 @@ function dragged() {
 function drag_ended() {
   if (topPlot != LIST_PLOT) { return; }
   movement = 0;
+}
+
+function selectOrdering(comp){
+	comparator = comp;
+	drawMeshData();
+}
+
+function orderArticleCount(a,b) {
+  var countA = a.selectedPmids.length;
+  var countB = b.selectedPmids.length;
+  if (countA < countB)
+    return -1;
+  if (countA > countB)
+    return 1;
+  return 0;
+}
+
+function orderBiasMag(a,b) {
+  var biasA = Math.abs(a.bias);
+  var biasB = Math.abs(b.bias);
+  if (biasA < biasB)
+    return -1;
+  if (biasA > biasB)
+    return 1;
+  return 0;
+}
+
+function orderBiasMale(a,b) {
+  var biasA = a.bias;
+  var biasB = b.bias;
+  if (biasA < biasB)
+    return -1;
+  if (biasA > biasB)
+    return 1;
+  return 0;
+}
+
+function orderBiasFemale(a,b) {
+  var biasA = a.bias;
+  var biasB = b.bias;
+  if (biasA > biasB)
+    return -1;
+  if (biasA < biasB)
+    return 1;
+  return 0;
 }
