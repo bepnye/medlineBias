@@ -1,24 +1,23 @@
 .container {
   width: 90%;
-  height: 800px;
+  height: 600px;
   margin: auto;
   padding: 10px;
   background: aqua;
 }
 
-.topDiv {
-  width: 48%;
+.leftDiv {
+  width: calc(50% - 5px);
   height: 600px;
-  background-color: #eee;
   overflow: scroll;
   float: left;
-}
-.bottomDiv {
-  margin-left: 52%;
-  width: 100%;
-  height: 601px;
   background-color: #eee;
-  clear: left;
+}
+.rightDiv {
+  width: calc(50% - 5px);
+  height: 600px;
+  background-color: #eee;
+  margin-left: calc(50% + 5px);
 }
 
 .toolBar {

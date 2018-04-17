@@ -218,7 +218,7 @@ function setRootMesh() {
 }
 
 function selectCountries(countryId) {
-  filters.push({'name': 'Country = '+countryId, 'fn': function (
+  filters.push({'name': 'Country = '+countryId, 'fn': function(a) { return true; } });
   selectedCountry = d.id;
   updateSelectedArticles(countryData.get(d.id).pmids);
 }

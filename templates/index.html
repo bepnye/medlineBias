@@ -3,16 +3,11 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!--<script src="http://d3js.org/d3.v4.min.js"></script>-->
-<!--<script src="https://d3js.org/d3-scale-chromatic.v0.3.min.js"></script>-->
-<!--<script src="https://d3js.org/topojson.v1.min.js"></script>-->
-<!--<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>-->
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>-->
-<script src="{{url_for('static', filename='lib/d3.v4.min.js')}}"></script>
-<script src="{{url_for('static', filename='lib/d3-scale-chromatic.v0.3.min.js')}}"></script>
-<script src="{{url_for('static', filename='lib/topojson.v1.min.js')}}"></script>
-<script src="{{url_for('static', filename='lib/d3-geo-projection.v2.min.js')}}"></script>
-<script src="{{url_for('static', filename='lib/d3-legend.js')}}"></script>
+<script src="http://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v0.3.min.js"></script>
+<script src="//d3js.org/topojson.v1.min.js"></script>
+<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>
 
 <head>
     <meta charset="utf-8">
@@ -21,19 +16,26 @@
 		<script>var _meshToArticles = {{ data.mesh_to_pmids | safe }};</script>
 </head>
 <body>
-
-  <div id="buttonDiv">
+  <div>
     <input name="resetButton" type="button" id="resetButton" value="Reset Data" onclick="resetData()"/>
     <input name="meshButton" type="button" id="meshButton" value="Set Root Mesh" onclick="setRootMesh()"/>
     <input name="meshNode" type="text" maxlength="512" id="meshNode" value=""/>
-    <input type="button" id="treeButton" value="Tree" onclick="drawTree();"/>
-    <input type="button" id="listButton" value="List" onclick="drawList();"/>
-    <input type="button" id="mapButton" value="Map" onclick="drawMap();"/>
-    <input type="button" id="timeButton" value="Time" onclick="drawTime();"/>
+    <br>
+    <br>
+	<div style="position:absolute; left:0%;">
+      <input type="button" id="treeButton" value="Tree" onclick="drawTree();"/>
+      <input type="button" id="listButton" value="List" onclick="drawList();"/>
+	</div>
+    <div style="position:relative; left:50%;">
+      <input type="button" id="mapButton" value="Map" onclick="drawMap();"/>
+      <input type="button" id="timeButton" value="Time" onclick="drawTime();"/>
+    </div>
   </div>
 
-  <br>
-
+  <div class="container">
+    <div id='left_div' class="leftDiv"></div>
+		<div id='right_div' class="rightDiv"></div>
+  </div>
   <div id='orderRadio' style="float:left; visibility: hidden;">
     Sort List By:
 	<br>
@@ -43,11 +45,6 @@
     <input type="radio" name="order" onclick="selectOrdering(orderBiasFemale);"/> : Bias Toward Females<br />
   </div>
   <div id='toolBar_div' class="toolBar"></div>
-
-  <div class="container">
-    <div id='left_div' class="topDiv"></div>
-    <div id='right_div' class="bottomDiv"></div>
-  </div>
 
 	<script src="{{url_for('static', filename='utils.js')}}"></script>
 	<script src="{{url_for('static', filename='toolbar.js')}}"></script>
