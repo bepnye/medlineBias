@@ -1,95 +1,75 @@
-var height_per_bar;
-var movement = 0;
-
-var xScale;
-var yAxisL;
-var yAxisR;
-var bars;
-
-var data;
-var barWidth;
-var windowWidth;
-var yTop;
-var yBottom;
-
-var diseases;
-
 var listMargin = {top : 40,
               bottom: 20,
               left : 20,
               right: 20};
 
 var comparator = orderArticleCount;	  
+var axisDiv;
 			  
 function drawMeshData() {
   leftSvg.selectAll('*').remove();
+  if(axisDiv){
+	  axisDiv.remove();
+  }
   
   d3.select("#orderRadio").style("visibility", "visible")
 
-  leftSvg.call(d3.drag().on("drag", dragged).on("end", drag_ended));
-
-  var height = 600 - margin.top - margin.bottom;
+  var barWidth = 20;
+  var height = (barWidth*1.5*meshData.length) + listMargin.top + listMargin.bottom;
   var width = document.getElementById("left_div").clientWidth*0.95;
   leftSvg.attr('width', width);
   leftSvg.attr('height', height);
 
-	data = meshData.slice();
+	var data = meshData.slice();
 	data.sort(comparator);
 
-	diseases = [];
+	var diseases = [];
 	for (i = 0; i < data.length; i++) { 
 		diseases.push(data[i].name);
 	}
 
-	xScale = d3.scaleLinear()
+	axisDiv = d3.select("#left_div").append("div")
+		.style('position','absolute')
+		.style('top', document.getElementById('left_div').getBoundingClientRect().top+'px');
+	var axisSvg = axisDiv.append("svg")
+		.attr("width", width)
+		.attr("height", (listMargin.top+margin.top))
+		.attr("transform", "translate("
+					+ listMargin.left + ",0)");
+	axisSvg.append("rect")
+		.attr("width", "100%")
+		.attr("height", "100%")
+		.attr("fill", "#eee");
+	
+	var xScale = d3.scaleLinear()
 		.domain([-1,1])
 		.range([listMargin.left, width-listMargin.right]);
-	var xAxis = leftSvg.append("g")
-		.attr("transform", "translate(0," + listMargin.top + ")")
+	var xAxis = axisSvg.append("g")
+		.attr("transform", "translate(0," + (listMargin.top+margin.top-1) + ")")
 		.call(d3.axisTop().scale(xScale));
-	leftSvg.append("text")
+	axisSvg.append("text")
 			 .text("Bias Score")
 			 .attr("text-anchor", "middle")
-			 .attr("transform", "translate(" + (((width - listMargin.left - listMargin.right) / 2) + listMargin.left) + ",10)")
-		
-	barWidth = 20;
-	windowWidth = Math.floor((height-listMargin.top-listMargin.bottom)/(barWidth*1.5));
-	height_per_bar = (height-listMargin.top-listMargin.bottom)/windowWidth;
-	yTop = diseases.length;
-	yBottom = Math.max(diseases.length-windowWidth, 0);
-
-  plot();
-}
-
-function plot(){
-  if(yAxisL){
-    yAxisL.remove();
-  }
-  if(yAxisR){
-    yAxisR.remove();
-  }
-  if(bars){
-    bars.remove();
-  }
+			 .attr("transform", "translate(" + (((width - listMargin.left - listMargin.right) / 2) + listMargin.left) + ",30)")
 
   var fBiasDiseasesL = [];
-  for (i = yBottom; i < Math.min(yTop, data.length); i++){
+  for (i = 0; i < data.length; i++){
     if(data[i].bias < 0){
-      fBiasDiseasesL.push(i-yBottom);
+      fBiasDiseasesL.push(i);
     }
   }
   var fBiasDiseasesR = fBiasDiseasesL.slice();
   
   var yScale =  d3.scaleBand()
-    .domain(diseases.slice(yBottom, yTop))
+    .domain(diseases)
     .range([height-listMargin.bottom, listMargin.top]);
-  yAxisL = leftSvg.append("g")
+  var yAxisL = leftSvg.append("g")
     .attr("transform", "translate(" + xScale(0) + ",0)")
     .call(d3.axisLeft().scale(yScale));
-  yAxisR = leftSvg.append("g")
+  var yAxisR = leftSvg.append("g")
     .attr("transform", "translate(" + xScale(0) + ",0)")
     .call(d3.axisRight().scale(yScale));
-  
+	
   var nextFDisease = fBiasDiseasesL.shift();
   yAxisL.selectAll("text")
     .filter(function(d, i) {
@@ -112,8 +92,8 @@ function plot(){
         }
       })
     .remove();
-  
-  bars = leftSvg.selectAll("rect")
+	
+  var bars = leftSvg.selectAll("rect.bar")
     .data(data)
     .enter()
     .filter(function(d, i) { return yScale(d.name); })
@@ -134,7 +114,7 @@ function plot(){
       .attr("stroke-linejoin", "round")
       .attr("fill", function(d) { return colorMap(d.bias); })
       .on("mouseenter", function(d) {
-        showDiseaseTooltip(d.uid, margin.left, d3.event.pageY);
+        showDiseaseTooltip(d.uid, listMargin.left, d3.event.pageY);
       })
       .on('mouseout', function(d) { hideDiseaseTooltip(); })
       .on('dblclick', function(d) {
@@ -142,33 +122,6 @@ function plot(){
         topPlot = TREE_PLOT;
         updateSelectedMesh(getSubtreeMesh(rootMesh));
         })
-}
-function dragged() {
-  if (topPlot != LIST_PLOT) { return; }
-  var dy = d3.event.dy;
-  if((yTop == diseases.length && dy > 0) ||
-     (yBottom == 0 && dy < 0)){
-       return;
-  }
-  movement+=dy;
-  var intervals_moved = Math.trunc(movement/height_per_bar);
-  if(Math.abs(intervals_moved) >= 1){
-    movement -= intervals_moved*height_per_bar;
-  }
-  yTop += intervals_moved;
-  if(yTop > diseases.length){
-    yTop = diseases.length;
-  }
-  if(yTop  < windowWidth){
-    yTop = windowWidth
-  }
-  yBottom = Math.max(yTop-windowWidth, 0);
-  plot();
-}
-
-function drag_ended() {
-  if (topPlot != LIST_PLOT) { return; }
-  movement = 0;
 }
 
 function selectOrdering(comp){

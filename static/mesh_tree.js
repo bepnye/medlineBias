@@ -64,6 +64,9 @@ var i = 0,
 function drawTreeData() {
 
   leftSvg.selectAll('*').remove();
+  if(axisDiv){
+	  axisDiv.remove();
+  }
   
   d3.select("#orderRadio").style("visibility", "hidden")
 
@@ -80,7 +83,9 @@ function drawTreeData() {
 	root.y0 = 0;
 
 	// Collapse after the second level
-	root.children.forEach(collapse);
+	if(root.children){
+	  root.children.forEach(collapse);
+	}
 	update(root);
 }
 
