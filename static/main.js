@@ -34,7 +34,7 @@ _articleData.forEach(function(a) {
 });
 console.log('mapping mesh pmids');
 _meshToArticles.forEach(function(d) {
-  meshLookup.get(d.uid).pmids = d.pmids.filter(function (p) { return p != ""; });
+  meshLookup.get(d.uid).pmids = d.pmids.filter(function (p) { return p != "" && articleLookup.has(p); });
 });
 console.log('adding parents');
 _meshData.forEach(function(m) {
@@ -223,7 +223,7 @@ function addYearFilter(dateRange) {
 
 function addCountryFilter(countryId, inclusion) {
   var fn;
-  var desc = 'Country '+countryId;
+  var desc = countryNameLookup.get(countryId);
   if (inclusion == true) {
     fn = function (a) { return countryDict[a.country] == countryId; }
     desc += ' only';
@@ -236,13 +236,13 @@ function addCountryFilter(countryId, inclusion) {
 
 function addMeshFilter(uid, inclusion) {
   var fn;
-  var desc = ' '+meshLookup.get(uid).name;
+  var desc = meshLookup.get(uid).name;
   if (inclusion == true) {
     fn = function(m) { return meshLookup.get(uid).subs.indexOf(m.uid) >= 0; }
-    desc = 'Includes' + desc;
+    desc += ' only';
   } else {
     fn = function(m) { return meshLookup.get(uid).subs.indexOf(m.uid) < 0; }
-    desc = 'Excludes' + desc;
+    desc += ' excluded';
   }
   addFilter('mesh', desc, fn);
 }
@@ -336,9 +336,9 @@ function showDiseaseTooltip(mesh, x, y) {
     var m = meshLookup.get(mesh);
     d3.select("#tooltip1")
       .style("visibility", "visible")
-      .html(m.name+'<br>'+
-            '# articles: '+m.subPmids.length+'<br>'+
-            'subtree size: '+m.subs.length)
+      .html('<b>'+m.name+'</b><br>'+
+            'Articles: '+m.subPmids.length+'<br>'+
+            'Tree Size: '+m.subs.length)
       .style("left", x + "px")
       .style("top", y + "px");
   }
@@ -355,11 +355,9 @@ function hideDiseaseTooltip() {
 function showCountryTooltip(country, x, y) {
   if (countryData.has(country)) {
     var c = countryData.get(country);
-    var name = '';
-    c.names.forEach(function(n, n, set) { name += n +', '; });
     d3.select("#tooltip2")
       .style("visibility", "visible")
-      .html(name+'<br>'+'# articles: '+c.pmids.length)
+      .html('<b>'+countryNameLookup.get(country)+'</b><br>'+'Articles: '+c.pmids.length)
       .style("left", x + "px")
       .style("top", y + "px");
   }

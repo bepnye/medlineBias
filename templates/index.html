@@ -19,13 +19,18 @@
 </head>
 
 <body>
-  <div class="container" id="topBar">
+
+    <div id='toolBar_div' class="toolBar" height=50px></div>
+
     <!--<input name="resetButton" type="button" id="resetButton" value="Reset All Filters" onclick="resetData()"/>-->
     <!--<input name="meshButton" type="button" id="meshButton" value="Set Root Mesh" onclick="setRootMesh()"/>-->
     <!--<input name="meshNode" type="text" maxlength="512" id="meshNode" value=""/>-->
+  <div class="container" id="topBar">
     <span id="filterStats">[247880 Articles] [4758 Mesh] Current filters: </span>
-	</div>
+  </div>
 
+
+    <div class="container">
 	<div border-bottom="10px" class="container">
 		<div class="leftDivMisc">
       <input type="button" id="treeButton" value="Tree" onclick="drawTree();"/>
@@ -50,10 +55,6 @@
 		<div id='right_div' class="rightDiv"></div>
   </div>
 
-  <div class="container">
-    <div id='toolBar_div' class="toolBar"></div>
-  </div>
-
 	<script src="{{url_for('static', filename='utils.js')}}"></script>
 	<script src="{{url_for('static', filename='toolbar.js')}}"></script>
 	<script src="{{url_for('static', filename='mesh_tree.js')}}"></script>
@@ -62,5 +63,86 @@
 	<script src="{{url_for('static', filename='countries.js')}}"></script>
 	<script src="{{url_for('static', filename='main.js')}}"></script>
 	<script>init()</script>
+
+<h3>Motivation</h3>
+<p>Disproportionate representation of different demographics in medical literature has been a subject of interest and concern for decades. Specifically, gender bias is one of the most significant and important issues out of these demographics. Gender bias can originate from factors such as misperceptions of the true disease incidence rate, techniques for recruiting patients, gender issues serving as undesirable factors for research conductors, etc. This results in an inaccurate or incomplete understanding of medicine’s efficacy on the whole population. Thus, this situation calls for resolution to questions such as how to vividly recognize and evaluate the gender bias in the literature effectively and comprehensively. In this webpage, we create several visualizations(e.g., disease tree view, list view, map view, etc.) to enable researchers to identify and assess the gender bias in the extant medical literature from different aspects/perspectives, e.g., different diseases, countries as well as bias’s trends over time.</p>
+
+<h3>Data</h3>
+<p>The visualizations here are based on the data filtered, extracted, and summarized from PubMed’s Medline dataset, which is a collection of 24 million articles dating back to 1970. Since we are primarily interested in the gender bias issue and how it affects evidence-based medicine, we filter the dataset to only articles that are tagged as being a randomized controlled trial with human participants. We extract only attributes of the articles that are of interest to us, such as categorical fields (author, subjects, journal, publication types), ordinal (date of publication) and geo-spacial (country of publication). We define our metric for measuring the bias score as percent of articles with male participants minus percent of articles with female participants. We then aggregate and summarize the gender bias based on the categories of the diseases, countries and trends/changes along timeline.</p>
+
+<h3>Task Analysis</h3>
+<p>To investigate this issue more rigorously, we conducted several interviews with domain experts (an OB/GYN and several MdPhd researchers) to validate our data-extraction and data-analysis methodologies as well as broaden the scope of the project. Some findings surprised us during this process:</p>
+<ol> 
+<li>Researchers sometimes chose to exclude women due to concerns about hormonal instability (menstrual cycle, potential pregnancy complications)</li>
+<li>Women typically have lower dropout and more compliance within studies</li>
+<li>Minority populations are difficult for a few specific reasons (distrust of institutional medicine, co-variates with socio-economic status)</li>
+<li>There can be bias in the ways outcomes are evaluated - in particular, self-reported pain has been shown to be inconsistent between men and women</li>
+</ol>
+<p>By conducting detailed discussions with teammates as well as leveraging task-analysis theories in class afterwards, we identified these key tasks in the following tables. The first table lists data consumption tasks for users to view our visualizations in an interpretable graphical format, while the second table illustrates data production tasks for users to use the measured data to produce an understanding of the systemic causes of research bias.</p>
+
+<table>
+  <caption>Data consumption tasks</caption>
+  <tr>
+    <th>Task</th>
+    <th>Abstraction</th> 
+  </tr>
+  <tr>
+    <td>Determine the research bias for a specific disease</td>
+    <td>Compute Derived Value</td>
+  </tr>
+  <tr>
+    <td>Find diseases with high bias</td>
+    <td>Find Extrema</td>
+  </tr>
+  <tr>
+    <td>View all disease bias data to find patterns</td>
+    <td>Cluster</td>
+  </tr>
+  <tr>
+    <td>Compare research biases of different diseases</td>
+    <td>Correlate</td>
+  </tr>
+  <tr>
+    <td>Examine biases per country</td>
+    <td>Filter</td>
+  </tr>
+</table>
+<br>
+<table>
+  <caption>Data production tasks</caption>
+  <tr>
+    <th>Task</th>
+    <th>Abstraction</th>
+  </tr>
+  <tr>
+    <td>Analyze impact of disease distribution on bias</td>
+    <td>Characterize Distribution </td>
+  </tr>
+  <tr>
+    <td>Analyze impact of target population imbalance on bias</td>
+    <td>Characterize Distribution </td>
+  </tr>
+  <tr>
+    <td>Analyze impact of socio-economic factors on bias</td>
+    <td>Characterize Distribution</td>
+  </tr>
+</table>
+
+<h3>Design Process</h3>
+<p>In our project, we initiated the design process by brainstorming different kinds of potential plots catering to the corresponding data types involved in our tasks, and further made various sketches to reflect and evaluate them. After extensive discussion and design comparison, we selected the plots which most effectively illustrated the data and accurately reflected the visualization tasks involved.  The ones picked included a node-link tree diagram and a scrollable list-view bar chart (proposed by Ben), a line plot which reflects the temporal aspect (proposed by Dave) and a geo-spacial map indicating the bias distribution globally (proposed by Desheng 3).</p>
+
+<h3>Final Visualization</h3>
+<p>In our final visualizations here, the tasks we support match most of the ones listed in previous task tables, although there exist some slight differences. Concretely, the first task we enable is investigating the way gender bias distributes over diseases. This high-level task is supported by enabling users (especially those with medical background) to search primarily by disease from a disease-tree view visualization and enabling users (especially those without a particular disease in mind ) to search primarily by bias from a list view visualization. The secondary task after identifying disease(s) of interest is to observe how bias distributes over time and space from a timeline line chart and a map view plot. The former one enable user to zoom on the time axis to filter contemporary or historical documents while the latter one enable user to view bias per-country and update the original tree view and list view plots. 
+
+The final visualizations are polished based on the feedbacks collected through a usability testing walkthrough among peer-students in class. After that, we refined several utility elements, added text / annotations and updated the plots to improve aesthetics and strive to offer a better usability experiences.
+
+The python packages utilized for processing the data include json, flask, pandas, numpy, nltk, sklearn (e.g., sklearn.preprocessing, sklearn.metrics, etc.) , BeautifulSoup, etc. The javascript package utilized for creating the visualization is D3.</p>
+
+<h3>Data Analysis</h3>
+<p>From the visualizations in this webpage, we can find some interesting results. For example, from the line chart, we can find that the often discussed gender bias in cardiovascular disease was apparent in the MedLine randomized controlled trials, but only prior to the early 2000s. Although early trials skewed heavily towards men, a growing awareness in the 1980s and policy changes in the 1990s seem to have helped promote the inclusion of women. From the bar chart, we can see that there appear to be qualitative differences in the types of studies that target women vs. men. From the map plot, we can see that the bias distribution is a bit sparse and lots of regions fail to offer much insights into this issue. Meanwhile, when digging deeper into this issue, we can find that even if the numbers are closer in modern medical research, it’s still possible that large- scale, well-funded studies targeting middle aged participants still under-represent women and that much of the literature that specifically includes women is focused on population minorities or other demographic details.</p>
+
+<h3>Conclusion</h3>
+<p>In this webpage, we create several visualizations to enable viewers to identify and evaluate the gender bias in historical and contemporary medical literatures based on the data filtered, extracted, and summarized from PubMed’s Medline dataset. Apart from offering insights into the gender bias across different diseases/regions in a static way, the visualizations enable various kinds of interactions with the viewer such as brushing -and-linking, zooming and searching, etc for various purposes(e.g., filtering, details in demand, etc.). The diverse categories of plots (e.g., node-linked tree diagram, map, line chart, bar charts, etc. ) as well as the appropriate color map employed provide a friendly user experience. For future work, we plan to investigate some more specific issues using more cutting-edge techniques, for example, we will consider studying more clearly how the nature of the literature shifts over time by training topic models and/or word embeddings on the successive decades and evaluating how they change.</p>
+
 </body>
 </html>

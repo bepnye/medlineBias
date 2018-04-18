@@ -33,10 +33,26 @@
   margin-left: calc(50% + 5px);
 }
 
+#topBar {
+  height: 20px;
+  margin: auto;
+  padding-left: 35px;
+}
+
 .toolBar {
-  width: 33%;
-  height: 200px;
-  float: left
+  width: calc(50% - 5px);
+  margin: auto;
+  height: 50px;
+  text-align: center;
+}
+
+.tooltip {
+  line-height: 1;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 12px;
 }
 
 .listDropdown {
@@ -77,6 +93,11 @@
     fill: none;
     stroke: #ccc;
     stroke-width: 2px;
+}
+
+table, th, td {
+  border: 1px solid black;
+  float: center;
 }
 
 svg text {
