@@ -10,9 +10,9 @@ d3.json("https://albertcheu.github.io/scratch/bostock_topo.json",function(err,wo
 
 function drawCountryData() {
 	rightSvg.selectAll('*').remove();
-	var zoom = d3.zoom().on("zoom", function () { rightSvg.attr("transform", d3.zoomIdentity.scale(d3.event.transform.k))});
-	rightSvg.call(zoom);
-	zoom.scaleTo(rightSvg, 1);
+	//var zoom = d3.zoom().on("zoom", function () { rightSvg.attr("transform", d3.zoomIdentity.scale(d3.event.transform.k))});
+	//rightSvg.call(zoom);
+	//zoom.scaleTo(rightSvg, 1);
 	
 	var height = 600 - margin.top - margin.bottom;
 	var width = document.getElementById("right_div").clientWidth*0.95;
@@ -65,9 +65,15 @@ function drawCountryData() {
      }
    })
    .on('mouseout', function(d) { hideCountryTooltip(); }) 
-   .on('dblclick', function(d) {
-     if (countryData.has(d.id)) {
-       selectCountry(d.id);
+   .on('click', function(d) {
+     if (d3.event.shiftKey) {
+       if (countryData.has(d.id)) {
+         addCountryFilter(d.id, true);
+       }
+     } else if (d3.event.altKey) {
+       if (countryData.has(d.id)) {
+         addCountryFilter(d.id, false);
+       }
      }
-     });
+   });
 }

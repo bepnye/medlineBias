@@ -36,7 +36,7 @@ function drawYearData() {
     data.push({
       'year': parseInt(d.year),
       'bias': parseFloat(d.bias),
-	  'art' : d.pmids.length
+      'art' : d.pmids.length
       }
     );
   });
@@ -52,8 +52,6 @@ function drawYearData() {
   yScaleYear.domain([-1,1]);
   yScaleArt.domain([0, d3.extent(data, function(d) { return d.art })[1]]);
 
-  console.log(data);
-  
   var barWidth = 8;
   var bars = rightSvg.selectAll("rect.bar")
      .data(data)
@@ -171,11 +169,5 @@ function brushed_time(){
   }
   time_range[0] = roundDate(time_range[0]);
   time_range[1] = roundDate(time_range[1]);
-  newSelectedArticles = [];
-  yearData.forEach(function(d) {
-    if (time_range[0] <= d.year && d.year <= time_range[1]) {
-      newSelectedArticles = newSelectedArticles.concat(d.pmids);
-    }
-  });
-  updateSelectedArticles(newSelectedArticles);
+  addYearFilter(time_range);
 }

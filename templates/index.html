@@ -11,22 +11,35 @@
 
 <head>
     <meta charset="utf-8">
+		<script>console.log('pulling data from python');</script>
 		<script>var _meshData = {{ data.mesh | safe }};</script>
 		<script>var _articleData = {{ data.articles | safe }};</script>
 		<script>var _meshToArticles = {{ data.mesh_to_pmids | safe }};</script>
+		<script>console.log('done!');</script>
 </head>
+
 <body>
-  <div>
-    <input name="resetButton" type="button" id="resetButton" value="Reset Data" onclick="resetData()"/>
-    <input name="meshButton" type="button" id="meshButton" value="Set Root Mesh" onclick="setRootMesh()"/>
-    <input name="meshNode" type="text" maxlength="512" id="meshNode" value=""/>
-    <br>
-    <br>
-	<div style="position:absolute; left:0%;">
+  <div class="container" id="topBar">
+    <!--<input name="resetButton" type="button" id="resetButton" value="Reset All Filters" onclick="resetData()"/>-->
+    <!--<input name="meshButton" type="button" id="meshButton" value="Set Root Mesh" onclick="setRootMesh()"/>-->
+    <!--<input name="meshNode" type="text" maxlength="512" id="meshNode" value=""/>-->
+    <span id="filterStats">[247880 Articles] [4758 Mesh] Current filters: </span>
+	</div>
+
+	<div border-bottom="10px" class="container">
+		<div class="leftDivMisc">
       <input type="button" id="treeButton" value="Tree" onclick="drawTree();"/>
       <input type="button" id="listButton" value="List" onclick="drawList();"/>
-	</div>
-    <div style="position:relative; left:50%;">
+      <input type="button" id="parentRoot" value="Move Root Up" onclick="setParentRoot();"/>
+      <span id='listDropdownText'>   Sort order:</span>
+      <select id="listDropdown" onchange="listDropdownChanged()">
+        <option value="0"># Articles</option>
+        <option value="1">Bias</option>
+        <option value="2">Bias (F)</option>
+        <option value="3">Bias (M)</option>
+      </select>
+		</div>
+		<div class="rightDivMisc">
       <input type="button" id="mapButton" value="Map" onclick="drawMap();"/>
       <input type="button" id="timeButton" value="Time" onclick="drawTime();"/>
     </div>
@@ -36,15 +49,10 @@
     <div id='left_div' class="leftDiv"></div>
 		<div id='right_div' class="rightDiv"></div>
   </div>
-  <div id='orderRadio' style="float:left; visibility: hidden;">
-    Sort List By:
-	<br>
-    <input type="radio" name="order" checked = "checked" onclick="selectOrdering(orderArticleCount);"/> : Number of Articles<br />
-    <input type="radio" name="order" onclick="selectOrdering(orderBiasMag);"/> : Bias Magnitude<br />
-    <input type="radio" name="order" onclick="selectOrdering(orderBiasMale);"/> : Bias Toward Males<br />
-    <input type="radio" name="order" onclick="selectOrdering(orderBiasFemale);"/> : Bias Toward Females<br />
+
+  <div class="container">
+    <div id='toolBar_div' class="toolBar"></div>
   </div>
-  <div id='toolBar_div' class="toolBar"></div>
 
 	<script src="{{url_for('static', filename='utils.js')}}"></script>
 	<script src="{{url_for('static', filename='toolbar.js')}}"></script>

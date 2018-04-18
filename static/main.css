@@ -1,21 +1,34 @@
 .container {
-  width: 90%;
-  height: 600px;
+  width: 95%;
   margin: auto;
-  padding: 10px;
-  background: aqua;
+  padding: 1px;
+  background: white;
+}
+
+.leftDivMisc {
+  width: calc(50% - 5px);
+  overflow: scroll;
+  float: left;
+  background-color: white;
+}
+.rightDivMisc {
+  width: calc(50% - 5px);
+  overflow: scroll;
+  background-color: white;
+  margin-left: calc(50% + 5px);
 }
 
 .leftDiv {
   width: calc(50% - 5px);
-  height: 600px;
+	height: 600;
   overflow: scroll;
   float: left;
   background-color: #eee;
 }
 .rightDiv {
   width: calc(50% - 5px);
-  height: 600px;
+	height: 600;
+  overflow: scroll;
   background-color: #eee;
   margin-left: calc(50% + 5px);
 }
@@ -24,6 +37,9 @@
   width: 33%;
   height: 200px;
   float: left
+}
+
+.listDropdown {
 }
 
 .plot {
@@ -61,4 +77,14 @@
     fill: none;
     stroke: #ccc;
     stroke-width: 2px;
+}
+
+svg text {
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+}
+svg text::selection {
+    background: none;
 }

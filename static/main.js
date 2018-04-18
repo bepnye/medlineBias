@@ -2,49 +2,6 @@ var meshLookup = new Map();
 var articleLookup = new Map();
 var meshNameToUid = new Map();
 
-_meshData.forEach(function(m) {
-  m.children = m.children.filter(function(c) { return c != ""; });
-  m.treeTypes = new Set();
-  m.treepos.forEach(function(t) { m.treeTypes.add(t[0]); });
-  meshLookup.set(m.uid, m);
-  meshNameToUid.set(m.name, m.uid);
-});
-_articleData.forEach(function(a) {
-  a.mesh = a.mesh.filter(function (m) { return m != ""; });
-	articleLookup.set(a.pmid, a);
-});
-_meshToArticles.forEach(function(d) {
-  meshLookup.get(d.uid).pmids = d.pmids.filter(function (p) { return p != ""; });
-  //meshLookup.get(d.uid).selectedPmids = meshLookup.get(d.uid).pmids;
-  //meshLookup.get(d.uid).bias = 0.0;
-});
-
-console.log(meshLookup);
-console.log(articleLookup);
-
-var allMesh = Array.from(meshLookup.keys()).filter(function(m) { return meshLookup.get(m).treeTypes.has('C'); });
-var allArticles = Array.from(articleLookup.keys());
-
-var rootMesh = null;
-var selectedMesh = allMesh.slice();
-var selectedArticles = allArticles.slice();
-var selectedCountry = null;
-
-var topPlot;
-var bottomPlot;
-// Unique ids for checking which plot is active
-var TREE_PLOT = 0;
-var LIST_PLOT = 1;
-var TIME_PLOT = 2;
-var MAP_PLOT = 4;
-
-var treeData;
-var meshData;
-var yearData;
-var countryData;
-
-var filters = [];
-
 function getSubtreeMesh(root) {
   var queue = [root];
   // Get ids for all the subtree mesh terms
@@ -61,17 +18,70 @@ function getSubtreeMesh(root) {
   return Array.from(subMesh);
 }
 
+console.log('building _meshData');
+_meshData.forEach(function(m) {
+  m.children = m.children.filter(function(c) { return c != ""; });
+  m.treeTypes = new Set();
+  m.treepos.forEach(function(t) { m.treeTypes.add(t[0]); });
+  meshLookup.set(m.uid, m);
+  meshNameToUid.set(m.name, m.uid);
+});
+console.log('building _articleData');
+_articleData.forEach(function(a) {
+  a.mesh = a.mesh.map(function (m) { return meshNameToUid.get(m); });
+  a.mesh = a.mesh.filter(function (m) { return m; });
+	articleLookup.set(a.pmid, a);
+});
+console.log('mapping mesh pmids');
+_meshToArticles.forEach(function(d) {
+  meshLookup.get(d.uid).pmids = d.pmids.filter(function (p) { return p != ""; });
+});
+console.log('adding parents');
 _meshData.forEach(function(m) {
   mesh = meshLookup.get(m.uid);
+  mesh.children.forEach(function (c) {
+    var child = meshLookup.get(c);
+    child.source = m.uid;
+  });
+});
+console.log('computing subtrees');
+_meshData.forEach(function(m) {
+  mesh = meshLookup.get(m.uid);
+  var subPmids = new Set(mesh.pmids);
   mesh.subs = getSubtreeMesh(m.uid);
-  mesh.subPmids = mesh.pmids.slice();
   mesh.subs.forEach(function(d) {
     meshLookup.get(d).pmids.forEach(function(p) {
-      mesh.subPmids.push(p);
+      subPmids.add(p);
     });
   });
-  mesh.subPmids = Array.from(new Set(mesh.subPmids));
+  mesh.subPmids = Array.from(subPmids);
+  mesh.selectedPmids = mesh.subPmids.slice();
 });
+console.log('done');
+console.log(meshLookup);
+console.log(articleLookup);
+
+var allMesh = new Set(Array.from(meshLookup.keys()));
+var allArticles = new Set(Array.from(articleLookup.keys()));
+
+var rootMesh = null;
+var selectedMesh = new Set(allMesh);
+var selectedArticles = new Set(allArticles);
+
+var topPlot;
+var bottomPlot;
+// Unique ids for checking which plot is active
+var TREE_PLOT = 0;
+var LIST_PLOT = 1;
+var TIME_PLOT = 2;
+var MAP_PLOT = 4;
+
+var treeData;
+var meshData;
+var yearData;
+var countryData;
+
+var filters = [];
 
 function getBiasFromLabels(labels) {
   if (labels.length == 0) { return 0.0; }
@@ -86,30 +96,18 @@ function getBiasFromLabels(labels) {
       default: ; break;
     }
 	});
-  if (nF == 0.0) { return (-2.3); }
-  if (nM == 0.0) { return (2.3); }
-  return Math.log(nM/nF);
+  return nM/(nM+nF) - nF/(nM+nF);
 }
 
 function getBiasFromPmids(pmids) {
-  var labels = [];
-  pmids.forEach(function(pmid) {
-    try {
-      labels.push(articleLookup.get(pmid).label);
-    } catch (err) {
-      console.log('no data for', pmid);
-    }
-  });
+  var labels = pmids.map(function (p) { return articleLookup.get(p).label; });
   return getBiasFromLabels(labels);
 }
 
 function updateMeshBias() {
   console.log('Updating mesh bias...');
-  var curArticles = new Set(selectedArticles);
   meshLookup.forEach(function(m, ui, map) {
-    var pmids = m.subPmids.filter(function(pmid) { return curArticles.has(pmid); });
-    m.selectedPmids = pmids;
-    m.bias = getBiasFromPmids(pmids);
+    m.bias = getBiasFromPmids(m.selectedPmids);
   });
   console.log('done!');
 };
@@ -117,7 +115,7 @@ function updateMeshBias() {
 function computeYearData() {
   console.log('Computing year data...');
   var yearData = new Map();
-  selectedArticles.forEach(function(a) {
+  selectedArticles.forEach(function(a,a,set) {
     var article = articleLookup.get(a);
     var y = article.date;
     if (!yearData.has(y)) {
@@ -129,8 +127,6 @@ function computeYearData() {
   years.forEach(function(y) {
     yearData.get(y).bias = getBiasFromPmids(yearData.get(y).pmids);
   });
-  var yi = d3.min(years);
-  var yf = d3.max(years);
   console.log('done!');
   return Array.from(yearData.values());
 }
@@ -138,7 +134,7 @@ function computeYearData() {
 function computeCountryData() {
   console.log('Computing country data...');
 	var countryData = new Map();
-  selectedArticles.forEach(function(a) {
+  selectedArticles.forEach(function(a,a,set) {
     var article = articleLookup.get(a);
     var c = countryDict[article.country];
     if (!countryData.has(c)) {
@@ -157,7 +153,7 @@ function computeCountryData() {
 function computeMeshData() {
   console.log('Computing mesh data...');
   var meshData = [];
-  selectedMesh.forEach(function(m) {
+  selectedMesh.forEach(function(m,m,set) {
     meshData.push(meshLookup.get(m));
   });
   console.log('done!');
@@ -167,37 +163,9 @@ function computeMeshData() {
 function computeAllData() {
   updateMeshBias();
   treeData = computeTreeData();
-  console.log(treeData);
   meshData = computeMeshData();
-  console.log(meshData);
   yearData = computeYearData();
-  console.log(yearData);
   countryData = computeCountryData();
-  console.log(countryData);
-}
-
-function updateSelectedMesh(newSelectedMesh) {
-  selectedMesh = newSelectedMesh;
-  // Update the articles to include only the ones with relevant mesh terms
-  newSelectedArticles = new Set();
-  selectedMesh.forEach(function(m) {
-    meshLookup.get(m).pmids.forEach(function(p) {
-      if (p != "") {
-        if (!selectedCountry || countryDict[articleLookup.get(p).country] == selectedCountry) {
-          newSelectedArticles.add(p);
-        }
-      }
-    });
-  });
-  updateSelectedArticles(Array.from(newSelectedArticles));
-}
-
-function updateSelectedArticles(newSelectedArticles) {
-  console.log(selectedArticles);
-  selectedArticles = newSelectedArticles;
-  console.log(selectedArticles);
-  computeAllData();
-  refreshPlots();
 }
 
 function setRootMesh() {
@@ -212,10 +180,100 @@ function setRootMesh() {
   }
 }
 
+function setParentRoot() {
+  var source = meshLookup.get(rootMesh).source;
+  if (source) {
+    rootMesh = source;
+  } else {
+    rootMesh = null;
+  }
+  treeData = computeTreeData();
+  drawTree();
+}
+
 function selectCountries(countryId) {
-  filters.push({'name': 'Country = '+countryId, 'fn': function(a) { return true; } });
-  selectedCountry = d.id;
-  updateSelectedArticles(countryData.get(d.id).pmids);
+}
+
+function addFilter(target, desc, fn) {
+  var newFilter = {
+    'target': target,
+    'desc': desc,
+    'fn': fn
+  }
+  filters.push(newFilter);
+  var button = document.createElement("input");
+  button.type = "button";
+  button.id = desc;
+  button.value = desc;
+  button.addEventListener('click', function() { removeFilter(this); });
+  document.getElementById("topBar").appendChild(button);
+  computeSelection();
+}
+
+function removeFilter(button) {
+  button.parentNode.removeChild(button);
+  filters = filters.filter(function(f) { return f.desc != button.value; });
+  computeSelection();
+}
+
+function addYearFilter(dateRange) {
+  console.log('adding filter for', dateRange);
+  addFilter('articles', 'Years '+dateRange[0]+' to '+dateRange[1], function (a) { return dateRange[0] <= a.date && a.date <= dateRange[1]; });
+}
+
+function addCountryFilter(countryId, inclusion) {
+  var fn;
+  var desc = 'Country '+countryId;
+  if (inclusion == true) {
+    fn = function (a) { return countryDict[a.country] == countryId; }
+    desc += ' only';
+  } else {
+    fn = function (a) { return countryDict[a.country] != countryId; }
+    desc += ' excluded';
+  }
+  addFilter('articles', desc, fn);
+}
+
+function addMeshFilter(uid, inclusion) {
+  var fn;
+  var desc = ' '+meshLookup.get(uid).name;
+  if (inclusion == true) {
+    fn = function(m) { return meshLookup.get(uid).subs.indexOf(m.uid) >= 0; }
+    desc = 'Includes' + desc;
+  } else {
+    fn = function(m) { return meshLookup.get(uid).subs.indexOf(m.uid) < 0; }
+    desc = 'Excludes' + desc;
+  }
+  addFilter('mesh', desc, fn);
+}
+
+function computeSelection() {
+  var newArticles = [];
+  var newMesh = [];
+  allArticles.forEach(function (a,a,set) { newArticles.push(articleLookup.get(a)); });
+  allMesh.forEach(function (m,m,set) { newMesh.push(meshLookup.get(m)); });
+  filters.forEach(function (f) {
+    if (f.target == 'articles') {
+      newArticles = newArticles.filter(f.fn);
+    } else if (f.target == 'mesh') {
+      newMesh = newMesh.filter(f.fn);
+    }
+  });
+  newPmids = new Set(newArticles.map(function(a) { return a.pmid; }));
+  newMesh.forEach(function (m) {
+    m.selectedPmids = m.subPmids.filter(function (p) { return newPmids.has(p); });
+  });
+  newMesh = newMesh.filter(function (m) { return m.selectedPmids.length > 0; });
+  selectedMesh = new Set(newMesh.map(function(m) { return m.uid; }));
+  
+  selectedArticles = new Set();
+  newMesh.forEach(function(m) {
+    m.selectedPmids.forEach(function(p) { selectedArticles.add(p); });
+  });
+
+  document.getElementById('filterStats').innerHTML = '['+selectedArticles.size+' Articles] ['+selectedMesh.size+' Mesh] Current filters: ';
+  computeAllData();
+  refreshPlots();
 }
 
 function refreshPlots() {
@@ -234,12 +292,11 @@ function refreshPlots() {
 
 function resetData() {
   rootMesh = null;
-  selectedCountry = null;
-  selectedMesh = allMesh;
-  selectedArticles = allArticles;
-  document.getElementById("meshNode").value = "";
+  selectedMesh = new Set(allMesh);
+  selectedArticles = new Set(allArticles);
   computeAllData();
   hideDiseaseTooltip();
+  hideCountryTooltip();
   refreshPlots();
 }
 
@@ -248,11 +305,17 @@ function resetCountry() {
 }
 
 function drawTree() {
+  d3.select("#listDropdownText").style("visibility", "hidden")
+  d3.select("#listDropdown").style("visibility", "hidden")
+  d3.select("#parentRoot").style("visibility", "visible")
   topPlot = TREE_PLOT;
   document.getElementById("treeButton").checked = true;
   drawTreeData();
 }
 function drawList() {
+  d3.select("#listDropdownText").style("visibility", "visible")
+  d3.select("#listDropdown").style("visibility", "visible")
+  d3.select("#parentRoot").style("visibility", "hidden")
   topPlot = LIST_PLOT;
   document.getElementById("listButton").checked = true;
   drawMeshData();
@@ -274,7 +337,7 @@ function showDiseaseTooltip(mesh, x, y) {
     d3.select("#tooltip1")
       .style("visibility", "visible")
       .html(m.name+'<br>'+
-            '# articles: '+m.selectedPmids.length+'<br>'+
+            '# articles: '+m.subPmids.length+'<br>'+
             'subtree size: '+m.subs.length)
       .style("left", x + "px")
       .style("top", y + "px");
@@ -311,6 +374,7 @@ function hideCountryTooltip() {
 }
 
 function init() {
+	console.log('initializing...');
   computeAllData();
   drawTree();
   drawTime();

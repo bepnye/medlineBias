@@ -1,7 +1,11 @@
+var i = 0,
+		duration = 300,
+		root,
+		treemap;
+
 var meshToNode = function(source, m) {
   var node = {
     'bias': m.bias,
-    'size': m.subs.length,
     'name': m.name,
     'uid': m.uid,
     'parent': source.name,
@@ -9,10 +13,8 @@ var meshToNode = function(source, m) {
   }
   if (m.children.length > 0 && m.children[0].length > 0) {
     m.children.forEach(function(child) {
-      if (meshLookup.has(child)) {
+      if (selectedMesh.has(child)) {
         node.children.push(meshToNode(node, meshLookup.get(child)));
-      } else {
-        console.log('ERROR: could not find info for uid =', child);
       }
     });
   }
@@ -36,10 +38,10 @@ function computeTreeData() {
     treeData.size = mesh.subs.length;
     children = mesh.children;
   } else {
+    console.log(rootMesh, 'DEFAULTS');
     treeData.name = '';
     treeData.uid = '';
     treeData.bias = 0.0;
-    treeData.size = meshLookup.size;
     children = ['D000820', 'D001423', 'D002318', 'D004066',
                 'D004700', 'D005128', 'D005261', 'D006425',
                 'D007154', 'D007280', 'D009057', 'D009140',
@@ -51,26 +53,20 @@ function computeTreeData() {
 
 	children.forEach(function(r) {
 		var mesh = meshLookup.get(r);
-		treeData.children.push(meshToNode(treeData, mesh));
+    if (selectedMesh.has(r)) {
+      treeData.children.push(meshToNode(treeData, mesh));
+    }
 	});
 	return treeData;
 }
 
-var i = 0,
-		duration = 300,
-		root,
-		treemap;
-
 function drawTreeData() {
 
   leftSvg.selectAll('*').remove();
-  if(axisDiv){
-	  axisDiv.remove();
-  }
   
   d3.select("#orderRadio").style("visibility", "hidden")
 
-  var height = 600 - margin.top - margin.bottom;
+  var height = 600;
   var width = 3000 - margin.left - margin.right;
   leftSvg.attr('width', width);
   leftSvg.attr('height', height);
@@ -109,7 +105,7 @@ function update(source) {
 
   // Normalize for fixed-depth.
   //nodes.forEach(function(d){ d.y = d.depth * 180 + 50});
-  nodes.forEach(function(d){ d.y = 50 + d.depth*180; });
+  nodes.forEach(function(d){ d.y = 100 + d.depth*250; });
 
   // ****************** Nodes section ***************************
 
@@ -125,7 +121,6 @@ function update(source) {
     })
     .on('click', click)
     .on('mouseenter', function(d) {
-      console.log(source.data.size);
       showDiseaseTooltip(d.data.uid, d3.event.pageX+15, d3.event.pageY-25);
     })
     .on('mouseout', function(d) {
@@ -243,14 +238,21 @@ function update(source) {
 
   // Toggle children on click.
   function click(d) {
-    if (d.children) {
-        d._children = d.children;
-        d.children = null;
-      } else {
-        d.children = d._children;
-        d._children = null;
-      }
-    update(d);
+    if (d3.event.shiftKey) {
+      rootMesh = d.data.uid;
+      addMeshFilter(d.data.uid, true);
+    } else if (d3.event.altKey) {
+      addMeshFilter(d.data.uid, false);
+    } else {
+      if (d.children) {
+          d._children = d.children;
+          d.children = null;
+        } else {
+          d.children = d._children;
+          d._children = null;
+        }
+      update(d);
+    }
   }
 
   function doubleclick(d) {

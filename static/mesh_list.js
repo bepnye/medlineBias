@@ -1,56 +1,40 @@
-var listMargin = {top : 40,
+var listMargin = {top : 50,
               bottom: 20,
               left : 20,
               right: 20};
 
 var comparator = orderArticleCount;	  
-var axisDiv;
 			  
 function drawMeshData() {
   leftSvg.selectAll('*').remove();
-  if(axisDiv){
-	  axisDiv.remove();
-  }
-  
-  d3.select("#orderRadio").style("visibility", "visible")
+
+	var data = meshData.slice().sort(comparator);
+  data = data.slice(-300);
 
   var barWidth = 20;
-  var height = (barWidth*1.5*meshData.length) + listMargin.top + listMargin.bottom;
-  var width = document.getElementById("left_div").clientWidth*0.95;
+  var height = (barWidth*1.5*data.length) + listMargin.top + listMargin.bottom;
+  var width = document.getElementById("left_div").clientWidth;
   leftSvg.attr('width', width);
   leftSvg.attr('height', height);
-
-	var data = meshData.slice();
-	data.sort(comparator);
 
 	var diseases = [];
 	for (i = 0; i < data.length; i++) { 
 		diseases.push(data[i].name);
 	}
 
-	axisDiv = d3.select("#left_div").append("div")
-		.style('position','absolute')
-		.style('top', document.getElementById('left_div').getBoundingClientRect().top+'px');
-	var axisSvg = axisDiv.append("svg")
-		.attr("width", width)
-		.attr("height", (listMargin.top+margin.top))
-		.attr("transform", "translate("
-					+ listMargin.left + ",0)");
-	axisSvg.append("rect")
-		.attr("width", "100%")
-		.attr("height", "100%")
-		.attr("fill", "#eee");
-	
 	var xScale = d3.scaleLinear()
 		.domain([-1,1])
 		.range([listMargin.left, width-listMargin.right]);
-	var xAxis = axisSvg.append("g")
-		.attr("transform", "translate(0," + (listMargin.top+margin.top-1) + ")")
+	var xAxis = leftSvg.append("g")
+		.attr('class', 'list_x_axis')
+		.attr("transform", "translate(0," + listMargin.top + ")")
 		.call(d3.axisTop().scale(xScale));
-	axisSvg.append("text")
+	leftSvg.append("text")
 			 .text("Bias Score")
 			 .attr("text-anchor", "middle")
-			 .attr("transform", "translate(" + (((width - listMargin.left - listMargin.right) / 2) + listMargin.left) + ",30)")
+			 .attr("transform", "translate(" + (((width - listMargin.left - listMargin.right) / 2) + listMargin.left) + ",5)")
+
+	var xAxisHeight = d3.select('.list_x_axis').node().getBoundingClientRect().height;
 
   var fBiasDiseasesL = [];
   for (i = 0; i < data.length; i++){
@@ -114,18 +98,33 @@ function drawMeshData() {
       .attr("stroke-linejoin", "round")
       .attr("fill", function(d) { return colorMap(d.bias); })
       .on("mouseenter", function(d) {
-        showDiseaseTooltip(d.uid, listMargin.left, d3.event.pageY);
+        showDiseaseTooltip(d.uid, d3.event.pageX, d3.event.pageY+30);
       })
       .on('mouseout', function(d) { hideDiseaseTooltip(); })
       .on('dblclick', function(d) {
         rootMesh = d.uid;
-        topPlot = TREE_PLOT;
-        updateSelectedMesh(getSubtreeMesh(rootMesh));
-        })
+        treeData = computeTreeData();
+        drawTree();
+      })
+			.on('click', function(d) {
+        if (d3.event.shiftKey) {
+          rootMesh = d.uid;
+          addMeshFilter(d.uid, true);
+        } else if (d3.event.altKey) {
+          addMeshFilter(d.uid, false);
+        }
+      });
 }
 
-function selectOrdering(comp){
-	comparator = comp;
+function listDropdownChanged() {
+  var dropdownValue = document.getElementById("listDropdown").value;
+  switch (dropdownValue) {
+    case "0": comparator = orderArticleCount; break;
+    case "1": comparator = orderBiasMag; break;
+    case "2": comparator = orderBiasFemale; break;
+    case "3": comparator = orderBiasMale; break;
+    default: ; break;
+  }
 	drawMeshData();
 }
 

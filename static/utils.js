@@ -8,14 +8,10 @@ var colorMap = d3.scaleSequential(d3.interpolateRdBu)
 var leftSvg = d3.select("#left_div").append("svg")
 		.attr("width", width)
 		.attr("height", height)
-		.attr("transform", "translate("
-					+ margin.left + "," + margin.top + ")");
 
 var rightSvg = d3.select("#right_div").append("svg")
 		.attr("width", width)
 		.attr("height", height)
-		.attr("transform", "translate("
-					+ margin.left + "," + margin.top + ")");
 					
 var toolbarSvg = d3.select("#toolBar_div").append("svg")
 		.attr("width", document.getElementById("toolBar_div").clientWidth)
@@ -38,7 +34,6 @@ var bottomTooltip = d3.select("body")
     .style("z-index", "10")
     .style("visibility", "hidden")
     .style("background", "white")
-    .text("a simple tooltip");
 
 var countryDict = {
 	'ARGENTINA': 32,
