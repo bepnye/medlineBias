@@ -61,7 +61,9 @@ console.log('done');
 console.log(meshLookup);
 console.log(articleLookup);
 
-var allMesh = new Set(Array.from(meshLookup.keys()));
+var MIN_ARTS = 50;
+
+var allMesh = new Set(Array.from(meshLookup.keys()).filter(function(m) { return meshLookup.get(m).subPmids.length > 50;}));
 var allArticles = new Set(Array.from(articleLookup.keys()));
 
 var rootMesh = null;
@@ -96,6 +98,7 @@ function getBiasFromLabels(labels) {
       default: ; break;
     }
 	});
+  //return Math.log(nM/nF);
   return nM/(nM+nF) - nF/(nM+nF);
 }
 
@@ -263,7 +266,7 @@ function computeSelection() {
   newMesh.forEach(function (m) {
     m.selectedPmids = m.subPmids.filter(function (p) { return newPmids.has(p); });
   });
-  newMesh = newMesh.filter(function (m) { return m.selectedPmids.length > 0; });
+  newMesh = newMesh.filter(function (m) { return m.selectedPmids.length > 50; });
   selectedMesh = new Set(newMesh.map(function(m) { return m.uid; }));
   
   selectedArticles = new Set();
