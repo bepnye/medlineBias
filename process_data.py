@@ -199,7 +199,7 @@ def write_article_csv(articles):
                  'journal': lambda s: s.title if s else '<MISSING>',
                  'country': lambda s: s,
                  'label': lambda s: s,
-                 'mesh': lambda s: SEP2.join(['%s' %m.text for m in s]),
+                 'mesh': lambda s: SEP2.join(['%s' %m.uid for m in s]),
                }
   with open('articles.csv', 'w') as fp:
     fp.write(SEP1.join(header))

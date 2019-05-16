@@ -2,7 +2,7 @@ var margin = {top: 20, right: 20, bottom: 20, left: 20},
     width = 900 - margin.left - margin.right,
     height = 600 - margin.top - margin.bottom;
 	
-var colorMap = d3.scaleSequential(d3.interpolateRdBu)
+var colorMap = d3.scaleSequential(d3.interpolatePRGn)
     .domain([-1, 1]);
 
 var leftSvg = d3.select("#left_div").append("svg")

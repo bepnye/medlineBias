@@ -8,55 +8,19 @@ var meshToNode = function(source, m) {
     'bias': m.bias,
     'name': m.name,
     'uid': m.uid,
-    'parent': source.name,
+    'size': m.selectedSubs.length,
+    'selected': selectedMesh.has(m.uid),
     'children': [],
   }
-  if (m.children.length > 0 && m.children[0].length > 0) {
-    m.children.forEach(function(child) {
-      if (selectedMesh.has(child)) {
-        node.children.push(meshToNode(node, meshLookup.get(child)));
-      }
-    });
-  }
+  m.children.forEach(function(child) {
+    node.children.push(meshToNode(node, meshLookup.get(child)));
+  });
   return node;
 }
 
 function computeTreeData() {
-  var treeData = {
-    'parent': 'null',
-    'depth': 0,
-    'children': [],
-    'relativeSize': 1,
-    }
-  var children;
+  treeData = meshToNode({'name': null}, meshLookup.get(rootMesh));
 
-  if (rootMesh) {
-    var mesh = meshLookup.get(rootMesh);
-    treeData.name = mesh.name;
-    treeData.uid = mesh.uid;
-    treeData.bias = mesh.bias;
-    treeData.size = mesh.subs.length;
-    children = mesh.children;
-  } else {
-    console.log(rootMesh, 'DEFAULTS');
-    treeData.name = '';
-    treeData.uid = '';
-    treeData.bias = 0.0;
-    children = ['D000820', 'D001423', 'D002318', 'D004066',
-                'D004700', 'D005128', 'D005261', 'D006425',
-                'D007154', 'D007280', 'D009057', 'D009140',
-                'D009358', 'D009369', 'D009422', 'D009750',
-                'D009784', 'D010038', 'D010272', 'D012140',
-                'D013568', 'D014777', 'D014947', 'D017437',
-                'D052801', 'D064419'];
-  }
-
-	children.forEach(function(r) {
-		var mesh = meshLookup.get(r);
-    if (selectedMesh.has(r)) {
-      treeData.children.push(meshToNode(treeData, mesh));
-    }
-	});
 	return treeData;
 }
 
@@ -77,6 +41,7 @@ function drawTreeData() {
 	root = d3.hierarchy(treeData, function(d) { return d.children; });
 	root.x0 = height / 2;
 	root.y0 = 0;
+  root.parent = {'data': {'size': root.data.size } };
 
 	// Collapse after the second level
 	if(root.children){
@@ -105,7 +70,8 @@ function update(source) {
 
   // Normalize for fixed-depth.
   //nodes.forEach(function(d){ d.y = d.depth * 180 + 50});
-  nodes.forEach(function(d){ d.y = 100 + d.depth*250; });
+  var rootSize = root.data.size;
+  nodes.forEach(function(d){ d.y = 150 + d.depth*220; });
 
   // ****************** Nodes section ***************************
 
@@ -135,20 +101,36 @@ function update(source) {
           //return d._children ? "lightsteelblue" : "#fff";
           return colorMap(d.data.bias);
       })
+      .style('stroke-width', 1)
       .style('stroke', function(d) {
           return d._children ? "black" : "#fff";
       });
+
+  var getNodeRadius = function (d) {
+    if (d.data.selected) {
+      return 5+15*d.data.size/d.parent.data.size;
+    } else {
+      return 5;
+    }
+  };
+
+  var getNodeText = function (d) {
+    return d.data.name;
+  };
 
   // Add labels for the nodes
   nodeEnter.append('text')
       .attr("dy", ".35em")
       .attr("x", function(d) {
-          return d.children || d._children ? -13 : 13;
+          return d.children || d._children ? -1*getNodeRadius(d)-4 : getNodeRadius(d)+4;
       })
       .attr("text-anchor", function(d) {
           return d.children || d._children ? "end" : "start";
       })
-      .text(function(d) { return d.data.name; });
+      .text(getNodeText)
+      .style('fill', function(d) {
+        return d.data.selected ? 'black' : 'DimGray';
+      })
 
   // UPDATE
   var nodeUpdate = nodeEnter.merge(node);
@@ -162,7 +144,7 @@ function update(source) {
 
   // Update the node attributes and style
   nodeUpdate.select('circle.node')
-    .attr('r', 10)
+    .attr('r', getNodeRadius)
     .style("fill", function(d) {
         return colorMap(d.data.bias);
     })

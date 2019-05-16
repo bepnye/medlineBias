@@ -66,17 +66,18 @@ var MIN_ARTS = 50;
 var allMesh = new Set(Array.from(meshLookup.keys()).filter(function(m) { return meshLookup.get(m).subPmids.length > 50;}));
 var allArticles = new Set(Array.from(articleLookup.keys()));
 
-var rootMesh = null;
+var rootMesh = 'D0';
 var selectedMesh = new Set(allMesh);
 var selectedArticles = new Set(allArticles);
 
-var topPlot;
-var bottomPlot;
 // Unique ids for checking which plot is active
 var TREE_PLOT = 0;
 var LIST_PLOT = 1;
 var TIME_PLOT = 2;
 var MAP_PLOT = 4;
+
+var topPlot = TREE_PLOT;
+var bottomPlot = TIME_PLOT;
 
 var treeData;
 var meshData;
@@ -99,7 +100,8 @@ function getBiasFromLabels(labels) {
     }
 	});
   //return Math.log(nM/nF);
-  return nM/(nM+nF) - nF/(nM+nF);
+  //return nM/(nM+nF) - nF/(nM+nF);
+  return Math.tanh(3.0*((nM-nF)/(nM+nF)));
 }
 
 function getBiasFromPmids(pmids) {
@@ -188,7 +190,7 @@ function setParentRoot() {
   if (source) {
     rootMesh = source;
   } else {
-    rootMesh = null;
+    rootMesh = 'D0';
   }
   treeData = computeTreeData();
   drawTree();
@@ -238,16 +240,20 @@ function addCountryFilter(countryId, inclusion) {
 }
 
 function addMeshFilter(uid, inclusion) {
+  var target;
   var fn;
   var desc = meshLookup.get(uid).name;
   if (inclusion == true) {
+    target = 'mesh'
     fn = function(m) { return meshLookup.get(uid).subs.indexOf(m.uid) >= 0; }
     desc += ' only';
   } else {
+    target = 'mesh'
+    //fn = function(a) { return a.mesh.indexOf(uid) < 0; }
     fn = function(m) { return meshLookup.get(uid).subs.indexOf(m.uid) < 0; }
     desc += ' excluded';
   }
-  addFilter('mesh', desc, fn);
+  addFilter(target, desc, fn);
 }
 
 function computeSelection() {
@@ -256,6 +262,7 @@ function computeSelection() {
   allArticles.forEach(function (a,a,set) { newArticles.push(articleLookup.get(a)); });
   allMesh.forEach(function (m,m,set) { newMesh.push(meshLookup.get(m)); });
   filters.forEach(function (f) {
+    console.log(f);
     if (f.target == 'articles') {
       newArticles = newArticles.filter(f.fn);
     } else if (f.target == 'mesh') {
@@ -271,7 +278,12 @@ function computeSelection() {
   
   selectedArticles = new Set();
   newMesh.forEach(function(m) {
-    m.selectedPmids.forEach(function(p) { selectedArticles.add(p); });
+    m.selectedPmids.forEach(function (p) {
+      if (newPmids.has(p)) {
+        selectedArticles.add(p);
+      }
+    });
+    m.selectedSubs = m.subs.filter(function(s) { return selectedMesh.has(s); });
   });
 
   document.getElementById('filterStats').innerHTML = '['+selectedArticles.size+' Articles] ['+selectedMesh.size+' Mesh] Current filters: ';
@@ -294,7 +306,7 @@ function refreshPlots() {
 }
 
 function resetData() {
-  rootMesh = null;
+  rootMesh = 'D0';
   selectedMesh = new Set(allMesh);
   selectedArticles = new Set(allArticles);
   computeAllData();
@@ -340,8 +352,8 @@ function showDiseaseTooltip(mesh, x, y) {
     d3.select("#tooltip1")
       .style("visibility", "visible")
       .html('<b>'+m.name+'</b><br>'+
-            'Articles: '+m.subPmids.length+'<br>'+
-            'Tree Size: '+m.subs.length)
+            'Articles: '+m.selectedPmids.length+'<br>'+
+            'Tree Size: '+m.selectedSubs.length)
       .style("left", x + "px")
       .style("top", y + "px");
   }
@@ -376,10 +388,8 @@ function hideCountryTooltip() {
 
 function init() {
 	console.log('initializing...');
-  computeAllData();
-  drawTree();
-  drawTime();
   drawToolbar();
+  computeSelection();
 }
 
 //console.log(articleData);
